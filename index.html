@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Ajuda a evitar erro 153 do YouTube em hospedagens normais -->
   <meta name="referrer" content="strict-origin-when-cross-origin" />
 
   <title>Sua cabeça liga justamente quando você tenta dormir?</title>
@@ -136,8 +134,7 @@
       isolation: isolate;
     }
 
-    #yt-player,
-    #yt-player iframe {
+    #vimeo-player {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -145,9 +142,6 @@
       border: none;
       z-index: 1;
       background: #000;
-    }
-
-    #yt-player iframe {
       pointer-events: none;
     }
 
@@ -207,51 +201,6 @@
       text-shadow: 0 1px 10px rgba(0,0,0,0.95);
       text-align: center;
       line-height: 1.28;
-    }
-
-    #error-fallback {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: rgba(0,0,0,0.88);
-      text-align: center;
-    }
-
-    #error-fallback.visible {
-      display: flex;
-    }
-
-    .fallback-box {
-      max-width: 520px;
-    }
-
-    .fallback-title {
-      font-size: clamp(18px, 2.5vw, 26px);
-      font-weight: 900;
-      margin-bottom: 10px;
-    }
-
-    .fallback-text {
-      color: rgba(255,255,255,0.74);
-      font-size: 15px;
-      line-height: 1.45;
-      margin-bottom: 18px;
-    }
-
-    .fallback-button {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 14px 20px;
-      border-radius: 999px;
-      background: #fff;
-      color: #050816;
-      font-size: 15px;
-      font-weight: 900;
     }
 
     #progress-bar-track {
@@ -330,6 +279,10 @@
         font-size: 13px;
       }
 
+      h1 {
+        font-size: clamp(29px, 9vw, 42px);
+      }
+
       .video-shell {
         padding: 7px;
         border-radius: 23px;
@@ -368,7 +321,14 @@
       <div id="vsl-wrapper">
         <div class="video-shell">
           <div id="video-container" aria-label="Toque para assistir ao vídeo">
-            <div id="yt-player"></div>
+            <iframe
+              id="vimeo-player"
+              src="https://player.vimeo.com/video/1197201080?autoplay=1&muted=1&controls=0&title=0&byline=0&portrait=0&badge=0&autopause=0&playsinline=1&dnt=1"
+              allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
+              title="VSL Cofre Noturno">
+            </iframe>
 
             <div id="overlay">
               <div class="overlay-icon">
@@ -377,19 +337,6 @@
                 </svg>
               </div>
               <span class="overlay-label" id="overlay-text">Toque para ativar o som</span>
-            </div>
-
-            <div id="error-fallback">
-              <div class="fallback-box">
-                <div class="fallback-title">O vídeo não carregou aqui.</div>
-                <p class="fallback-text">
-                  Isso normalmente acontece quando o arquivo HTML é aberto direto do computador ou quando o YouTube bloqueia o embed nesse ambiente.
-                  Hospede a página em um domínio/servidor para o player carregar corretamente.
-                </p>
-                <a class="fallback-button" href="https://www.youtube.com/watch?v=hTbhlfkS4jI" target="_blank" rel="noopener">
-                  Assistir no YouTube
-                </a>
-              </div>
             </div>
           </div>
 
@@ -408,26 +355,23 @@
     </section>
   </main>
 
-  <script src="https://www.youtube.com/iframe_api"></script>
+  <script src="https://player.vimeo.com/api/player.js"></script>
 
   <script>
-    const VIDEO_ID = "hTbhlfkS4jI";
-    const VIDEO_URL = "https://www.youtube.com/watch?v=hTbhlfkS4jI";
-    const FALLBACK_TOTAL_SECONDS = 119;
-
-    let player;
-    let appState = "preview";
-    let totalSeconds = FALLBACK_TOTAL_SECONDS;
-    let progressElapsed = 0;
-    let progressStart = null;
-    let rafId = null;
+    const iframe = document.getElementById("vimeo-player");
+    const player = new Vimeo.Player(iframe);
 
     const overlay = document.getElementById("overlay");
     const overlayText = document.getElementById("overlay-text");
     const iconSvg = document.getElementById("icon-svg");
     const fill = document.getElementById("progress-bar-fill");
     const container = document.getElementById("video-container");
-    const errorFallback = document.getElementById("error-fallback");
+
+    let appState = "preview"; // preview | playing | paused
+    let totalSeconds = 119;
+    let progressElapsed = 0;
+    let progressStart = null;
+    let rafId = null;
 
     const ICONS = {
       volume: '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>',
@@ -438,114 +382,71 @@
       iconSvg.innerHTML = ICONS[name];
     }
 
-    function getOrigin() {
-      if (location.protocol === "http:" || location.protocol === "https:") {
-        return location.origin;
-      }
+    player.ready().then(function () {
+      player.setMuted(true);
+      player.play().catch(function () {});
 
-      // Abrir como file:// pode causar erro 153 no YouTube.
-      return "https://www.youtube.com";
-    }
-
-    window.onYouTubeIframeAPIReady = function () {
-      player = new YT.Player("yt-player", {
-        videoId: VIDEO_ID,
-        host: "https://www.youtube.com",
-        playerVars: {
-          autoplay: 1,
-          mute: 1,
-          controls: 0,
-          modestbranding: 1,
-          rel: 0,
-          iv_load_policy: 3,
-          fs: 0,
-          disablekb: 1,
-          playsinline: 1,
-          origin: getOrigin(),
-          enablejsapi: 1
-        },
-        events: {
-          onReady: function (e) {
-            const iframe = document.querySelector("#yt-player iframe");
-            if (iframe) {
-              iframe.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
-              iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen");
-              iframe.setAttribute("allowfullscreen", "true");
-            }
-
-            e.target.mute();
-            e.target.playVideo();
-
-            setTimeout(function () {
-              const duration = Number(player.getDuration());
-              if (duration && duration > 0) totalSeconds = duration;
-            }, 900);
-          },
-          onStateChange: onStateChange,
-          onError: onPlayerError
-        }
+      player.getDuration().then(function (duration) {
+        if (duration && duration > 0) totalSeconds = duration;
       });
-    };
+    });
 
-    function onPlayerError(event) {
-      // Erros comuns: 2, 5, 100, 101, 150 e 153.
-      console.warn("Erro do YouTube:", event.data);
-      errorFallback.classList.add("visible");
-      overlay.classList.add("hidden");
-      stopProgress();
-    }
-
-    function onStateChange(e) {
-      if (e.data === YT.PlayerState.ENDED && appState === "preview") {
-        player.seekTo(0);
-        player.playVideo();
+    player.on("ended", function () {
+      if (appState === "preview") {
+        player.setCurrentTime(0);
+        player.play().catch(function () {});
       }
 
-      if (e.data === YT.PlayerState.ENDED && appState === "playing") {
+      if (appState === "playing") {
         fill.style.width = "100%";
         stopProgress();
       }
-    }
+    });
 
     container.addEventListener("click", function () {
-      if (!player || errorFallback.classList.contains("visible")) return;
-
       if (appState === "preview") {
-        player.seekTo(0, true);
-        player.unMute();
-        player.setVolume(100);
-        player.playVideo();
+        player.setCurrentTime(0).then(function () {
+          player.setMuted(false);
+          player.setVolume(1);
+          player.play();
 
-        appState = "playing";
-        overlay.classList.add("hidden");
-        setIcon("volume");
-        overlayText.textContent = "Toque para ativar o som";
+          appState = "playing";
+          overlay.classList.add("hidden");
+          startProgress();
+          requestVideoFullscreen();
+        }).catch(function () {
+          player.setMuted(false);
+          player.setVolume(1);
+          player.play();
 
-        requestVideoFullscreen();
-        startProgress();
+          appState = "playing";
+          overlay.classList.add("hidden");
+          startProgress();
+          requestVideoFullscreen();
+        });
+
         return;
       }
 
       if (appState === "playing") {
-        player.pauseVideo();
+        player.pause();
 
         appState = "paused";
         overlay.classList.remove("hidden");
         setIcon("play");
         overlayText.textContent = "Toque para continuar";
-
         pauseProgress();
+
         return;
       }
 
       if (appState === "paused") {
-        player.playVideo();
+        player.play();
 
         appState = "playing";
         overlay.classList.add("hidden");
         setIcon("volume");
         overlayText.textContent = "Toque para ativar o som";
-
         resumeProgress();
       }
     });
