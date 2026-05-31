@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sua cabeça liga justamente quando você tenta dormir?</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      width: 100%;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top, rgba(38, 49, 82, 0.42), transparent 34%),
+        linear-gradient(180deg, #050816 0%, #02030a 46%, #000 100%);
+      color: #ffffff;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 26px 14px 42px;
+    }
+
+    .content {
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      padding: 9px 15px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #d7ddff;
+      font-size: 14px;
+      line-height: 1.2;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-align: center;
+      backdrop-filter: blur(12px);
+    }
+
+    h1 {
+      width: 100%;
+      max-width: 870px;
+      margin: 0 auto 14px;
+      text-align: center;
+      color: #ffffff;
+      font-size: clamp(30px, 5.8vw, 60px);
+      line-height: 0.98;
+      letter-spacing: -0.055em;
+      font-weight: 900;
+      text-wrap: balance;
+    }
+
+    .subheadline {
+      width: 100%;
+      max-width: 760px;
+      margin: 0 auto 18px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: clamp(16px, 2.25vw, 22px);
+      line-height: 1.38;
+      font-weight: 500;
+      text-wrap: balance;
+    }
+
+    .watch-note {
+      margin: 0 0 18px;
+      color: #b9c8ff;
+      text-align: center;
+      font-size: clamp(14px, 2vw, 17px);
+      font-weight: 800;
+      letter-spacing: 0.01em;
+    }
+
+    #vsl-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .video-shell {
+      width: min(100%, 430px);
+      margin: 0 auto;
+      padding: 10px;
+      border-radius: 28px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)),
+        rgba(255, 255, 255, 0.045);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+      box-shadow:
+        0 28px 80px rgba(0, 0, 0, 0.46),
+        0 0 70px rgba(87, 109, 255, 0.13);
+    }
+
+    #video-container {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 9 / 16;
+      background: #000;
+      cursor: pointer;
+      overflow: hidden;
+      border-radius: 20px;
+      isolation: isolate;
+    }
+
+    #yt-player {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border: none;
+      z-index: 1;
+      pointer-events: none;
+      background: #000;
+    }
+
+    #overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 24px;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,0.12), transparent 28%),
+        rgba(0,0,0,0.44);
+      transition: opacity 0.28s ease;
+    }
+
+    #overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .overlay-icon {
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.14);
+      border: 2.5px solid rgba(255,255,255,0.78);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 14px 50px rgba(0,0,0,0.36);
+      transition: transform 0.15s ease, background 0.15s ease;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    #video-container:hover .overlay-icon {
+      transform: scale(1.08);
+      background: rgba(255,255,255,0.24);
+    }
+
+    .overlay-icon svg {
+      width: 38px;
+      height: 38px;
+      fill: #fff;
+    }
+
+    .overlay-label {
+      max-width: 270px;
+      font-size: 16px;
+      font-weight: 800;
+      color: rgba(255,255,255,0.94);
+      letter-spacing: 0.015em;
+      text-shadow: 0 1px 10px rgba(0,0,0,0.95);
+      text-align: center;
+      line-height: 1.28;
+    }
+
+    #progress-bar-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.14);
+      overflow: hidden;
+      border-radius: 0 0 18px 18px;
+      transform: translateY(-1px);
+    }
+
+    #progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #526bff, #8ea2ff, #ffffff);
+      box-shadow: 0 0 14px rgba(142, 162, 255, 0.68);
+      transition: width 0.05s linear;
+    }
+
+    .cta-area {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 11px;
+      margin-top: 22px;
+    }
+
+    .cta-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: min(100%, 430px);
+      min-height: 58px;
+      padding: 16px 22px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #17c964, #0aae55);
+      color: #031208;
+      font-size: clamp(17px, 2.4vw, 21px);
+      font-weight: 950;
+      text-align: center;
+      box-shadow:
+        0 18px 38px rgba(23, 201, 100, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      transform: translateY(0);
+      transition: transform 0.18s ease, filter 0.18s ease;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.06);
+    }
+
+    .cta-helper {
+      color: rgba(255,255,255,0.62);
+      font-size: 13px;
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(255,255,255,0.22), 0 14px 50px rgba(0,0,0,0.36);
+      }
+      50% {
+        box-shadow: 0 0 0 13px rgba(255,255,255,0), 0 14px 50px rgba(0,0,0,0.36);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .page {
+        padding: 18px 12px 34px;
+      }
+
+      .eyebrow {
+        font-size: 13px;
+      }
+
+      .subheadline {
+        margin-bottom: 14px;
+      }
+
+      .watch-note {
+        margin-bottom: 14px;
+      }
+
+      .video-shell {
+        padding: 7px;
+        border-radius: 23px;
+      }
+
+      #video-container {
+        border-radius: 17px;
+      }
+
+      .overlay-icon {
+        width: 74px;
+        height: 74px;
+      }
+
+      .overlay-icon svg {
+        width: 33px;
+        height: 33px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page">
+    <section class="content">
+      <div class="eyebrow">Assista antes de tentar dormir hoje</div>
+
+      <h1>Sua cabeça liga justamente quando você tenta dormir?</h1>
+
+      <p class="subheadline">
+        Assista ao vídeo e descubra por que isso acontece — e como tirar da mente aquilo que fica rodando antes de dormir.
+      </p>
+
+      <p class="watch-note">Toque no vídeo para assistir em tela cheia com som</p>
+
+      <div id="vsl-wrapper">
+        <div class="video-shell">
+          <div id="video-container" aria-label="Toque para assistir ao vídeo">
+            <div id="yt-player"></div>
+
+            <div id="overlay">
+              <div class="overlay-icon">
+                <svg id="icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                </svg>
+              </div>
+              <span class="overlay-label" id="overlay-text">Toque para ativar o som</span>
+            </div>
+          </div>
+
+          <div id="progress-bar-track">
+            <div id="progress-bar-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-area">
+        <a class="cta-button" href="https://pay.hotmart.com/A105911517V?checkoutMode=10" target="_blank" rel="noopener">
+          Quero acessar agora
+        </a>
+        <p class="cta-helper">Você será direcionado para o checkout seguro da Hotmart.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    // ============================================================
+    // CONFIGURAÇÃO
+    // ============================================================
+
+    const VIDEO_ID = "hTbhlfkS4jI";
+    const CHECKOUT_URL = "https://pay.hotmart.com/A105911517V?checkoutMode=10";
+
+    // Caso o YouTube não retorne duração, esse valor será usado como reserva.
+    const FALLBACK_TOTAL_SECONDS = 119;
+
+    // ============================================================
+    // PLAYER
+    // ============================================================
+
+    let player;
+    let appState = "preview"; // "preview" | "playing" | "paused"
+
+    let totalSeconds = FALLBACK_TOTAL_SECONDS;
+    let progressElapsed = 0;
+    let progressStart = null;
+    let rafId = null;
+
+    const overlay = document.getElementById("overlay");
+    const overlayText = document.getElementById("overlay-text");
+    const iconSvg = document.getElementById("icon-svg");
+    const fill = document.getElementById("progress-bar-fill");
+    const container = document.getElementById("video-container");
+
+    const ICONS = {
+      volume: '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>',
+      play: '<path d="M8 5v14l11-7z"/>'
+    };
+
+    function setIcon(name) {
+      iconSvg.innerHTML = ICONS[name];
+    }
+
+    window.onYouTubeIframeAPIReady = function () {
+      player = new YT.Player("yt-player", {
+        videoId: VIDEO_ID,
+        playerVars: {
+          autoplay: 1,
+          mute: 1,
+          controls: 0,
+          modestbranding: 1,
+          rel: 0,
+          showinfo: 0,
+          iv_load_policy: 3,
+          fs: 0,
+          disablekb: 1,
+          playsinline: 1,
+          loop: 1,
+          playlist: VIDEO_ID
+        },
+        events: {
+          onReady: function (e) {
+            e.target.mute();
+            e.target.playVideo();
+
+            setTimeout(function () {
+              const duration = Number(player.getDuration());
+              if (duration && duration > 0) totalSeconds = duration;
+            }, 800);
+          },
+          onStateChange: onStateChange
+        }
+      });
+    };
+
+    function onStateChange(e) {
+      if (e.data === YT.PlayerState.ENDED && appState === "preview") {
+        player.seekTo(0);
+        player.playVideo();
+      }
+
+      if (e.data === YT.PlayerState.ENDED && appState === "playing") {
+        fill.style.width = "100%";
+        stopProgress();
+      }
+    }
+
+    container.addEventListener("click", function () {
+      if (!player) return;
+
+      if (appState === "preview") {
+        player.seekTo(0, true);
+        player.unMute();
+        player.setVolume(100);
+        player.playVideo();
+
+        appState = "playing";
+        overlay.classList.add("hidden");
+        setIcon("volume");
+        overlayText.textContent = "Toque para ativar o som";
+
+        requestVideoFullscreen();
+        startProgress();
+        return;
+      }
+
+      if (appState === "playing") {
+        player.pauseVideo();
+
+        appState = "paused";
+        overlay.classList.remove("hidden");
+        setIcon("play");
+        overlayText.textContent = "Toque para continuar";
+
+        pauseProgress();
+        return;
+      }
+
+      if (appState === "paused") {
+        player.playVideo();
+
+        appState = "playing";
+        overlay.classList.add("hidden");
+        setIcon("volume");
+        overlayText.textContent = "Toque para ativar o som";
+
+        resumeProgress();
+      }
+    });
+
+    function requestVideoFullscreen() {
+      const el = container;
+
+      try {
+        if (el.requestFullscreen) {
+          el.requestFullscreen();
+        } else if (el.webkitRequestFullscreen) {
+          el.webkitRequestFullscreen();
+        } else if (el.msRequestFullscreen) {
+          el.msRequestFullscreen();
+        }
+      } catch (error) {
+        // Alguns navegadores, principalmente iOS, podem bloquear fullscreen customizado.
+      }
+    }
+
+    // Barra de progresso persuasiva: começa mais rápida e desacelera suavemente.
+    function getPercent(t) {
+      t = Math.min(t, totalSeconds);
+      return Math.pow(t / totalSeconds, 0.38) * 100;
+    }
+
+    function tick(ts) {
+      if (progressStart === null) progressStart = ts;
+
+      const elapsed = progressElapsed + (ts - progressStart) / 1000;
+      fill.style.width = getPercent(elapsed).toFixed(2) + "%";
+
+      if (elapsed < totalSeconds) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        fill.style.width = "100%";
+      }
+    }
+
+    function startProgress() {
+      progressElapsed = 0;
+      progressStart = null;
+
+      if (rafId) cancelAnimationFrame(rafId);
+
+      fill.style.width = "0%";
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function pauseProgress() {
+      if (rafId) cancelAnimationFrame(rafId);
+
+      if (progressStart !== null) {
+        progressElapsed += (performance.now() - progressStart) / 1000;
+        progressStart = null;
+      }
+    }
+
+    function resumeProgress() {
+      progressStart = null;
+      rafId = requestAnimationFrame(tick);
+    }
+
+    function stopProgress() {
+      if (rafId) cancelAnimationFrame(rafId);
+    }
+  </script>
+</body>
+</html>
