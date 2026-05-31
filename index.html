@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Ajuda a evitar erro 153 do YouTube em hospedagens normais -->
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
+
   <title>Sua cabeça liga justamente quando você tenta dormir?</title>
 
   <style>
@@ -20,9 +24,9 @@
       width: 100%;
       min-height: 100vh;
       background:
-        radial-gradient(circle at top, rgba(38, 49, 82, 0.42), transparent 34%),
+        radial-gradient(circle at top, rgba(45, 60, 105, 0.42), transparent 34%),
         linear-gradient(180deg, #050816 0%, #02030a 46%, #000 100%);
-      color: #ffffff;
+      color: #fff;
       font-family: Arial, Helvetica, sans-serif;
       overflow-x: hidden;
     }
@@ -42,7 +46,7 @@
 
     .content {
       width: 100%;
-      max-width: 980px;
+      max-width: 1100px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -54,9 +58,9 @@
       justify-content: center;
       margin-bottom: 14px;
       padding: 9px 15px;
-      border: 1px solid rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255,255,255,0.16);
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255,255,255,0.06);
       color: #d7ddff;
       font-size: 14px;
       line-height: 1.2;
@@ -68,12 +72,12 @@
 
     h1 {
       width: 100%;
-      max-width: 870px;
+      max-width: 900px;
       margin: 0 auto 14px;
       text-align: center;
-      color: #ffffff;
-      font-size: clamp(30px, 5.8vw, 60px);
-      line-height: 0.98;
+      color: #fff;
+      font-size: clamp(30px, 5vw, 58px);
+      line-height: 1;
       letter-spacing: -0.055em;
       font-weight: 900;
       text-wrap: balance;
@@ -84,8 +88,8 @@
       max-width: 760px;
       margin: 0 auto 18px;
       text-align: center;
-      color: rgba(255, 255, 255, 0.78);
-      font-size: clamp(16px, 2.25vw, 22px);
+      color: rgba(255,255,255,0.78);
+      font-size: clamp(16px, 2vw, 22px);
       line-height: 1.38;
       font-weight: 500;
       text-wrap: balance;
@@ -108,23 +112,23 @@
     }
 
     .video-shell {
-      width: min(100%, 430px);
+      width: min(100%, 900px);
       margin: 0 auto;
       padding: 10px;
       border-radius: 28px;
       background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.04)),
-        rgba(255, 255, 255, 0.045);
-      border: 1px solid rgba(255, 255, 255, 0.13);
+        linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04)),
+        rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.13);
       box-shadow:
-        0 28px 80px rgba(0, 0, 0, 0.46),
-        0 0 70px rgba(87, 109, 255, 0.13);
+        0 28px 80px rgba(0,0,0,0.46),
+        0 0 70px rgba(87,109,255,0.13);
     }
 
     #video-container {
       position: relative;
       width: 100%;
-      aspect-ratio: 9 / 16;
+      aspect-ratio: 16 / 9;
       background: #000;
       cursor: pointer;
       overflow: hidden;
@@ -132,15 +136,19 @@
       isolation: isolate;
     }
 
-    #yt-player {
+    #yt-player,
+    #yt-player iframe {
       position: absolute;
       inset: 0;
       width: 100%;
       height: 100%;
       border: none;
       z-index: 1;
-      pointer-events: none;
       background: #000;
+    }
+
+    #yt-player iframe {
+      pointer-events: none;
     }
 
     #overlay {
@@ -155,7 +163,7 @@
       padding: 24px;
       background:
         radial-gradient(circle at center, rgba(255,255,255,0.12), transparent 28%),
-        rgba(0,0,0,0.44);
+        rgba(0,0,0,0.34);
       transition: opacity 0.28s ease;
     }
 
@@ -191,7 +199,7 @@
     }
 
     .overlay-label {
-      max-width: 270px;
+      max-width: 320px;
       font-size: 16px;
       font-weight: 800;
       color: rgba(255,255,255,0.94);
@@ -199,6 +207,51 @@
       text-shadow: 0 1px 10px rgba(0,0,0,0.95);
       text-align: center;
       line-height: 1.28;
+    }
+
+    #error-fallback {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(0,0,0,0.88);
+      text-align: center;
+    }
+
+    #error-fallback.visible {
+      display: flex;
+    }
+
+    .fallback-box {
+      max-width: 520px;
+    }
+
+    .fallback-title {
+      font-size: clamp(18px, 2.5vw, 26px);
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .fallback-text {
+      color: rgba(255,255,255,0.74);
+      font-size: 15px;
+      line-height: 1.45;
+      margin-bottom: 18px;
+    }
+
+    .fallback-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 14px 20px;
+      border-radius: 999px;
+      background: #fff;
+      color: #050816;
+      font-size: 15px;
+      font-weight: 900;
     }
 
     #progress-bar-track {
@@ -214,7 +267,7 @@
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, #526bff, #8ea2ff, #ffffff);
-      box-shadow: 0 0 14px rgba(142, 162, 255, 0.68);
+      box-shadow: 0 0 14px rgba(142,162,255,0.68);
       transition: width 0.05s linear;
     }
 
@@ -241,8 +294,8 @@
       font-weight: 950;
       text-align: center;
       box-shadow:
-        0 18px 38px rgba(23, 201, 100, 0.25),
-        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        0 18px 38px rgba(23,201,100,0.25),
+        inset 0 1px 0 rgba(255,255,255,0.35);
       transform: translateY(0);
       transition: transform 0.18s ease, filter 0.18s ease;
     }
@@ -268,21 +321,13 @@
       }
     }
 
-    @media (max-width: 520px) {
+    @media (max-width: 640px) {
       .page {
         padding: 18px 12px 34px;
       }
 
       .eyebrow {
         font-size: 13px;
-      }
-
-      .subheadline {
-        margin-bottom: 14px;
-      }
-
-      .watch-note {
-        margin-bottom: 14px;
       }
 
       .video-shell {
@@ -295,13 +340,13 @@
       }
 
       .overlay-icon {
-        width: 74px;
-        height: 74px;
+        width: 72px;
+        height: 72px;
       }
 
       .overlay-icon svg {
-        width: 33px;
-        height: 33px;
+        width: 32px;
+        height: 32px;
       }
     }
   </style>
@@ -333,6 +378,19 @@
               </div>
               <span class="overlay-label" id="overlay-text">Toque para ativar o som</span>
             </div>
+
+            <div id="error-fallback">
+              <div class="fallback-box">
+                <div class="fallback-title">O vídeo não carregou aqui.</div>
+                <p class="fallback-text">
+                  Isso normalmente acontece quando o arquivo HTML é aberto direto do computador ou quando o YouTube bloqueia o embed nesse ambiente.
+                  Hospede a página em um domínio/servidor para o player carregar corretamente.
+                </p>
+                <a class="fallback-button" href="https://www.youtube.com/watch?v=hTbhlfkS4jI" target="_blank" rel="noopener">
+                  Assistir no YouTube
+                </a>
+              </div>
+            </div>
           </div>
 
           <div id="progress-bar-track">
@@ -351,24 +409,14 @@
   </main>
 
   <script src="https://www.youtube.com/iframe_api"></script>
+
   <script>
-    // ============================================================
-    // CONFIGURAÇÃO
-    // ============================================================
-
     const VIDEO_ID = "hTbhlfkS4jI";
-    const CHECKOUT_URL = "https://pay.hotmart.com/A105911517V?checkoutMode=10";
-
-    // Caso o YouTube não retorne duração, esse valor será usado como reserva.
+    const VIDEO_URL = "https://www.youtube.com/watch?v=hTbhlfkS4jI";
     const FALLBACK_TOTAL_SECONDS = 119;
 
-    // ============================================================
-    // PLAYER
-    // ============================================================
-
     let player;
-    let appState = "preview"; // "preview" | "playing" | "paused"
-
+    let appState = "preview";
     let totalSeconds = FALLBACK_TOTAL_SECONDS;
     let progressElapsed = 0;
     let progressStart = null;
@@ -379,6 +427,7 @@
     const iconSvg = document.getElementById("icon-svg");
     const fill = document.getElementById("progress-bar-fill");
     const container = document.getElementById("video-container");
+    const errorFallback = document.getElementById("error-fallback");
 
     const ICONS = {
       volume: '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>',
@@ -389,37 +438,62 @@
       iconSvg.innerHTML = ICONS[name];
     }
 
+    function getOrigin() {
+      if (location.protocol === "http:" || location.protocol === "https:") {
+        return location.origin;
+      }
+
+      // Abrir como file:// pode causar erro 153 no YouTube.
+      return "https://www.youtube.com";
+    }
+
     window.onYouTubeIframeAPIReady = function () {
       player = new YT.Player("yt-player", {
         videoId: VIDEO_ID,
+        host: "https://www.youtube.com",
         playerVars: {
           autoplay: 1,
           mute: 1,
           controls: 0,
           modestbranding: 1,
           rel: 0,
-          showinfo: 0,
           iv_load_policy: 3,
           fs: 0,
           disablekb: 1,
           playsinline: 1,
-          loop: 1,
-          playlist: VIDEO_ID
+          origin: getOrigin(),
+          enablejsapi: 1
         },
         events: {
           onReady: function (e) {
+            const iframe = document.querySelector("#yt-player iframe");
+            if (iframe) {
+              iframe.setAttribute("referrerpolicy", "strict-origin-when-cross-origin");
+              iframe.setAttribute("allow", "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen");
+              iframe.setAttribute("allowfullscreen", "true");
+            }
+
             e.target.mute();
             e.target.playVideo();
 
             setTimeout(function () {
               const duration = Number(player.getDuration());
               if (duration && duration > 0) totalSeconds = duration;
-            }, 800);
+            }, 900);
           },
-          onStateChange: onStateChange
+          onStateChange: onStateChange,
+          onError: onPlayerError
         }
       });
     };
+
+    function onPlayerError(event) {
+      // Erros comuns: 2, 5, 100, 101, 150 e 153.
+      console.warn("Erro do YouTube:", event.data);
+      errorFallback.classList.add("visible");
+      overlay.classList.add("hidden");
+      stopProgress();
+    }
 
     function onStateChange(e) {
       if (e.data === YT.PlayerState.ENDED && appState === "preview") {
@@ -434,7 +508,7 @@
     }
 
     container.addEventListener("click", function () {
-      if (!player) return;
+      if (!player || errorFallback.classList.contains("visible")) return;
 
       if (appState === "preview") {
         player.seekTo(0, true);
@@ -477,22 +551,17 @@
     });
 
     function requestVideoFullscreen() {
-      const el = container;
-
       try {
-        if (el.requestFullscreen) {
-          el.requestFullscreen();
-        } else if (el.webkitRequestFullscreen) {
-          el.webkitRequestFullscreen();
-        } else if (el.msRequestFullscreen) {
-          el.msRequestFullscreen();
+        if (container.requestFullscreen) {
+          container.requestFullscreen();
+        } else if (container.webkitRequestFullscreen) {
+          container.webkitRequestFullscreen();
+        } else if (container.msRequestFullscreen) {
+          container.msRequestFullscreen();
         }
-      } catch (error) {
-        // Alguns navegadores, principalmente iOS, podem bloquear fullscreen customizado.
-      }
+      } catch (error) {}
     }
 
-    // Barra de progresso persuasiva: começa mais rápida e desacelera suavemente.
     function getPercent(t) {
       t = Math.min(t, totalSeconds);
       return Math.pow(t / totalSeconds, 0.38) * 100;
