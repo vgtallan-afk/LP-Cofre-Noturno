@@ -28,7 +28,7 @@
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      padding: 26px 14px 42px;
+      padding: 26px 14px 28px;
     }
 
     .content {
@@ -111,6 +111,18 @@
       overflow: hidden;
       border-radius: 20px;
       isolation: isolate;
+      cursor: pointer;
+    }
+
+    #video-container.fake-fullscreen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      width: 100vw;
+      height: 100vh;
+      aspect-ratio: auto;
+      border-radius: 0;
+      background: #000;
     }
 
     #vimeo-player {
@@ -124,7 +136,8 @@
       pointer-events: none;
     }
 
-    #start-overlay {
+    #start-overlay,
+    #pause-overlay {
       position: absolute;
       inset: 0;
       z-index: 4;
@@ -134,17 +147,38 @@
       justify-content: center;
       gap: 16px;
       padding: 24px;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+    }
+
+    #start-overlay {
       cursor: pointer;
       background:
         radial-gradient(circle at center, rgba(255,255,255,0.12), transparent 28%),
         rgba(0,0,0,0.38);
-      transition: opacity 0.25s ease, visibility 0.25s ease;
     }
 
-    #start-overlay.hidden {
+    #pause-overlay {
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      cursor: default;
+      background:
+        radial-gradient(circle at center, rgba(255, 70, 70, 0.16), transparent 32%),
+        rgba(112, 0, 0, 0.58);
+      backdrop-filter: blur(3px);
+    }
+
+    #start-overlay.hidden,
+    #pause-overlay.hidden {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
+    }
+
+    #pause-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
     }
 
     .overlay-icon {
@@ -176,6 +210,73 @@
       text-shadow: 0 1px 10px rgba(0,0,0,0.95);
       text-align: center;
       line-height: 1.28;
+    }
+
+    .pause-card {
+      width: min(100%, 520px);
+      padding: 24px;
+      border-radius: 26px;
+      background: rgba(15, 0, 0, 0.54);
+      border: 1px solid rgba(255, 255, 255, 0.20);
+      box-shadow: 0 26px 80px rgba(0,0,0,0.48);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 17px;
+      text-align: center;
+    }
+
+    .pause-title {
+      color: #fff;
+      font-size: clamp(20px, 3.1vw, 30px);
+      line-height: 1.08;
+      font-weight: 950;
+      letter-spacing: -0.03em;
+      text-shadow: 0 2px 18px rgba(0,0,0,0.55);
+    }
+
+    .pause-actions {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 11px;
+    }
+
+    .pause-button {
+      min-height: 52px;
+      border: 0;
+      border-radius: 16px;
+      padding: 13px 14px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 950;
+      color: #fff;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.18);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      backdrop-filter: blur(10px);
+      transition: transform 0.16s ease, background 0.16s ease;
+    }
+
+    .pause-button:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.22);
+    }
+
+    .pause-button.primary {
+      background: #fff;
+      color: #320000;
+      border-color: rgba(255,255,255,0.78);
+    }
+
+    .pause-button svg {
+      width: 17px;
+      height: 17px;
+      fill: currentColor;
+      flex: 0 0 auto;
     }
 
     #fullscreen-button {
@@ -253,7 +354,7 @@
       opacity: 1;
       transform: translateY(0);
       pointer-events: auto;
-      max-height: 220px;
+      max-height: 230px;
       margin-top: 22px;
     }
 
@@ -273,12 +374,13 @@
       box-shadow:
         0 18px 38px rgba(23,201,100,0.25),
         inset 0 1px 0 rgba(255,255,255,0.35);
-      transform: translateY(0);
+      transform: translateY(0) scale(1);
       transition: transform 0.18s ease, filter 0.18s ease;
+      animation: ctaPulse 1.55s ease-in-out infinite;
     }
 
     .cta-button:hover {
-      transform: translateY(-2px);
+      transform: translateY(-2px) scale(1.02);
       filter: brightness(1.06);
     }
 
@@ -287,6 +389,91 @@
       font-size: 13px;
       text-align: center;
       line-height: 1.35;
+    }
+
+    .footer {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin-top: 34px;
+      padding-top: 20px;
+      color: rgba(255,255,255,0.56);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .footer-links {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .footer-links a {
+      color: rgba(255,255,255,0.68);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    .footer-links a:hover {
+      color: #fff;
+    }
+
+    #lost-page {
+      display: none;
+      min-height: 100vh;
+      width: 100%;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at top, rgba(45, 60, 105, 0.32), transparent 34%),
+        linear-gradient(180deg, #050816 0%, #000 100%);
+      color: #fff;
+      text-align: center;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .lost-card {
+      width: min(100%, 620px);
+      padding: 34px 24px;
+      border-radius: 30px;
+      border: 1px solid rgba(255,255,255,0.14);
+      background: rgba(255,255,255,0.055);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.42);
+      backdrop-filter: blur(14px);
+    }
+
+    .lost-card h2 {
+      font-size: clamp(28px, 6vw, 52px);
+      line-height: 1;
+      letter-spacing: -0.05em;
+      margin-bottom: 14px;
+    }
+
+    .lost-card p {
+      max-width: 460px;
+      margin: 0 auto;
+      color: rgba(255,255,255,0.76);
+      font-size: clamp(16px, 2.4vw, 21px);
+      line-height: 1.35;
+      font-weight: 700;
+    }
+
+    .lost-back {
+      display: inline-flex;
+      margin-top: 24px;
+      padding: 13px 18px;
+      border-radius: 999px;
+      background: #fff;
+      color: #050816;
+      font-size: 14px;
+      font-weight: 900;
+      cursor: pointer;
+      border: 0;
     }
 
     @keyframes pulse {
@@ -298,8 +485,25 @@
       }
     }
 
+    @keyframes ctaPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow:
+          0 18px 38px rgba(23,201,100,0.25),
+          0 0 0 0 rgba(23,201,100,0.34),
+          inset 0 1px 0 rgba(255,255,255,0.35);
+      }
+      50% {
+        transform: scale(1.045);
+        box-shadow:
+          0 22px 46px rgba(23,201,100,0.35),
+          0 0 0 13px rgba(23,201,100,0),
+          inset 0 1px 0 rgba(255,255,255,0.35);
+      }
+    }
+
     @media (max-width: 640px) {
-      .page { padding: 18px 12px 34px; }
+      .page { padding: 18px 12px 28px; }
       .eyebrow { font-size: 13px; }
       h1 { font-size: clamp(29px, 9vw, 42px); }
       .video-shell { padding: 7px; border-radius: 23px; }
@@ -312,12 +516,19 @@
         padding: 9px 11px;
         font-size: 12px;
       }
+      .pause-card {
+        padding: 18px 14px;
+        border-radius: 22px;
+      }
+      .pause-actions {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 
 <body>
-  <main class="page">
+  <main id="main-page" class="page">
     <section class="content">
       <div class="eyebrow">Assista antes de tentar dormir hoje</div>
 
@@ -348,11 +559,33 @@
               <span class="overlay-label">Toque para assistir com som</span>
             </div>
 
+            <div id="pause-overlay" class="hidden">
+              <div class="pause-card">
+                <div class="pause-title">Você já começou a assistir este vídeo</div>
+
+                <div class="pause-actions">
+                  <button class="pause-button primary" id="continue-button" type="button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M8 5v14l11-7z"/>
+                    </svg>
+                    Continuar assistindo
+                  </button>
+
+                  <button class="pause-button" id="restart-button" type="button">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M12 5V2L7 7l5 5V9c2.76 0 5 2.24 5 5a5 5 0 0 1-8.66 3.42l-1.42 1.42A7 7 0 1 0 12 5z"/>
+                    </svg>
+                    Assistir do início
+                  </button>
+                </div>
+              </div>
+            </div>
+
             <button id="fullscreen-button" type="button" aria-label="Assistir em tela cheia horizontal">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 5h6v2H8.41l3.3 3.29-1.42 1.42L7 8.41V11H5V5zm14 0v6h-2V8.41l-3.29 3.3-1.42-1.42 3.3-3.29H13V5h6zM5 19v-6h2v2.59l3.29-3.3 1.42 1.42-3.3 3.29H11v2H5zm14-6v6h-6v-2h2.59l-3.3-3.29 1.42-1.42 3.29 3.3V13h2z"/>
+              <svg id="fullscreen-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path id="fullscreen-icon-path" d="M5 5h6v2H8.41l3.3 3.29-1.42 1.42L7 8.41V11H5V5zm14 0v6h-2V8.41l-3.29 3.3-1.42-1.42 3.3-3.29H13V5h6zM5 19v-6h2v2.59l3.29-3.3 1.42 1.42-3.3 3.29H11v2H5zm14-6v6h-6v-2h2.59l-3.3-3.29 1.42-1.42 3.29 3.3V13h2z"/>
               </svg>
-              Tela cheia
+              <span id="fullscreen-label">Tela cheia</span>
             </button>
           </div>
 
@@ -368,8 +601,24 @@
         </a>
         <p class="cta-helper">Você será direcionado para o checkout seguro da Hotmart.</p>
       </div>
+
+      <footer class="footer">
+        <div>Copyright 2025 - Todos os direitos reservados.</div>
+        <div class="footer-links">
+          <a href="?pagina=termos-de-uso" data-lost-link>Termos de Uso</a>
+          <a href="?pagina=politica-de-privacidade" data-lost-link>Política de Privacidade</a>
+        </div>
+      </footer>
     </section>
   </main>
+
+  <section id="lost-page">
+    <div class="lost-card">
+      <h2>Melhor pegar um GPS...</h2>
+      <p>Parece que você está perdido. Não há nada para ver aqui.</p>
+      <button class="lost-back" id="lost-back-button" type="button">Voltar</button>
+    </div>
+  </section>
 
   <script src="https://player.vimeo.com/api/player.js"></script>
 
@@ -378,17 +627,65 @@
     const player = new Vimeo.Player(iframe);
 
     const startOverlay = document.getElementById("start-overlay");
+    const pauseOverlay = document.getElementById("pause-overlay");
     const videoContainer = document.getElementById("video-container");
     const fullscreenButton = document.getElementById("fullscreen-button");
+    const fullscreenLabel = document.getElementById("fullscreen-label");
+    const fullscreenIconPath = document.getElementById("fullscreen-icon-path");
+    const continueButton = document.getElementById("continue-button");
+    const restartButton = document.getElementById("restart-button");
     const fill = document.getElementById("progress-bar-fill");
     const ctaArea = document.getElementById("cta-area");
+    const mainPage = document.getElementById("main-page");
+    const lostPage = document.getElementById("lost-page");
+    const lostBackButton = document.getElementById("lost-back-button");
 
     const CTA_TIME_SECONDS = 13 * 60 + 30;
     const DEFAULT_VIDEO_DURATION = 15 * 60 + 30;
 
+    const EXPAND_ICON = "M5 5h6v2H8.41l3.3 3.29-1.42 1.42L7 8.41V11H5V5zm14 0v6h-2V8.41l-3.29 3.3-1.42-1.42 3.3-3.29H13V5h6zM5 19v-6h2v2.59l3.29-3.3 1.42 1.42-3.3 3.29H11v2H5zm14-6v6h-6v-2h2.59l-3.3-3.29 1.42-1.42 3.29 3.3V13h2z";
+    const BACK_ICON = "M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.42-1.41L7.83 13H20v-2z";
+
     let hasUserStarted = false;
+    let isPlaying = false;
     let totalSeconds = DEFAULT_VIDEO_DURATION;
     let ctaShown = false;
+    let fakeFullscreenActive = false;
+
+    function isLostRoute() {
+      const params = new URLSearchParams(window.location.search);
+      const page = params.get("pagina");
+      return page === "termos-de-uso" || page === "politica-de-privacidade";
+    }
+
+    function renderRoute() {
+      if (isLostRoute()) {
+        mainPage.style.display = "none";
+        lostPage.style.display = "flex";
+      } else {
+        mainPage.style.display = "flex";
+        lostPage.style.display = "none";
+      }
+    }
+
+    renderRoute();
+
+    document.querySelectorAll("[data-lost-link]").forEach(function (link) {
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        history.pushState({}, "", link.getAttribute("href"));
+        renderRoute();
+        window.scrollTo(0, 0);
+      });
+    });
+
+    lostBackButton.addEventListener("click", function () {
+      history.pushState({}, "", window.location.pathname);
+      renderRoute();
+      window.scrollTo(0, 0);
+    });
+
+    window.addEventListener("popstate", renderRoute);
 
     player.ready().then(function () {
       player.setMuted(true);
@@ -400,6 +697,14 @@
       }).catch(function () {});
     });
 
+    player.on("play", function () {
+      if (hasUserStarted) isPlaying = true;
+    });
+
+    player.on("pause", function () {
+      if (hasUserStarted) isPlaying = false;
+    });
+
     player.on("ended", function () {
       if (!hasUserStarted) {
         player.setCurrentTime(0).then(function () {
@@ -408,6 +713,7 @@
           player.play().catch(function () {});
         });
       } else {
+        isPlaying = false;
         updateFakeProgress(totalSeconds);
       }
     });
@@ -424,11 +730,50 @@
     startOverlay.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
+      startFromBeginningWithSound();
+    });
 
+    videoContainer.addEventListener("click", function () {
+      if (!hasUserStarted) return;
+
+      if (isPlaying) {
+        pauseVideoAndShowOverlay();
+      }
+    });
+
+    continueButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      continueWatching();
+    });
+
+    restartButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      restartWatching();
+    });
+
+    pauseOverlay.addEventListener("click", function (event) {
+      event.stopPropagation();
+    });
+
+    fullscreenButton.addEventListener("click", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      toggleFullscreen();
+    });
+
+    document.addEventListener("fullscreenchange", updateFullscreenButton);
+    document.addEventListener("webkitfullscreenchange", updateFullscreenButton);
+
+    function startFromBeginningWithSound() {
       if (hasUserStarted) return;
 
-      startOverlay.classList.add("hidden");
       hasUserStarted = true;
+      isPlaying = true;
+      startOverlay.classList.add("hidden");
+      pauseOverlay.classList.remove("visible");
+      pauseOverlay.classList.add("hidden");
       updateFakeProgress(0);
 
       player.setCurrentTime(0).then(function () {
@@ -440,18 +785,44 @@
         player.setVolume(1);
         player.play().catch(function () {});
       });
-    });
+    }
 
-    fullscreenButton.addEventListener("click", function (event) {
-      event.preventDefault();
-      event.stopPropagation();
+    function pauseVideoAndShowOverlay() {
+      player.pause().catch(function () {});
+      isPlaying = false;
+      pauseOverlay.classList.remove("hidden");
+      pauseOverlay.classList.add("visible");
+    }
 
-      requestVideoFullscreen();
+    function continueWatching() {
+      pauseOverlay.classList.remove("visible");
+      pauseOverlay.classList.add("hidden");
 
-      if (!hasUserStarted) {
-        startOverlay.click();
-      }
-    });
+      player.play().then(function () {
+        isPlaying = true;
+      }).catch(function () {
+        isPlaying = true;
+      });
+    }
+
+    function restartWatching() {
+      pauseOverlay.classList.remove("visible");
+      pauseOverlay.classList.add("hidden");
+      updateFakeProgress(0);
+
+      player.setCurrentTime(0).then(function () {
+        player.setMuted(false);
+        player.setVolume(1);
+        return player.play();
+      }).then(function () {
+        isPlaying = true;
+      }).catch(function () {
+        player.setMuted(false);
+        player.setVolume(1);
+        player.play().catch(function () {});
+        isPlaying = true;
+      });
+    }
 
     function showCTA() {
       if (ctaShown) return;
@@ -462,24 +833,36 @@
     }
 
     /*
-      Curva da barra fake:
-      00:00  -> 0%
-      00:30  -> 25%
-      02:00  -> 35%
-      05:00  -> 50%
-      09:00  -> 68%
-      13:30  -> 88%   aparece o CTA
-      15:30+ -> 100%
+      Curva fake:
+      00:30 -> 25%
+      01:00 -> 35%
+      02:00 -> 45%
+      03:00 -> 54%
+      04:00 -> 60%
+      05:00 -> 65%
+      13:30 -> 90% e aparece o CTA
     */
     function getFakePercent(seconds) {
       const anchors = [
         { t: 0, p: 0 },
         { t: 30, p: 25 },
-        { t: 120, p: 35 },
-        { t: 300, p: 50 },
-        { t: 540, p: 68 },
-        { t: CTA_TIME_SECONDS, p: 88 },
-        { t: Math.max(totalSeconds, CTA_TIME_SECONDS + 60), p: 100 }
+        { t: 60, p: 35 },
+        { t: 120, p: 45 },
+        { t: 180, p: 54 },
+        { t: 240, p: 60 },
+        { t: 300, p: 65 },
+        { t: 360, p: 69 },
+        { t: 420, p: 73 },
+        { t: 480, p: 77 },
+        { t: 540, p: 80 },
+        { t: 600, p: 83 },
+        { t: 660, p: 85 },
+        { t: 720, p: 87 },
+        { t: 780, p: 89 },
+        { t: CTA_TIME_SECONDS, p: 90 },
+        { t: 840, p: 92 },
+        { t: 900, p: 97 },
+        { t: Math.max(totalSeconds, 930), p: 100 }
       ];
 
       const s = Math.max(0, seconds);
@@ -490,7 +873,7 @@
 
         if (s >= a.t && s <= b.t) {
           const ratio = (s - a.t) / (b.t - a.t);
-          const eased = 1 - Math.pow(1 - ratio, 1.8);
+          const eased = 1 - Math.pow(1 - ratio, 1.55);
           return a.p + (b.p - a.p) * eased;
         }
       }
@@ -503,26 +886,87 @@
       fill.style.width = percent.toFixed(2) + "%";
     }
 
+    function toggleFullscreen() {
+      if (isCurrentlyFullscreen()) {
+        exitFullscreen();
+        return;
+      }
+
+      requestVideoFullscreen();
+    }
+
     function requestVideoFullscreen() {
-      const target = videoContainer;
-
       try {
-        if (target.requestFullscreen) {
-          target.requestFullscreen().then(lockLandscape).catch(function () {});
+        if (videoContainer.requestFullscreen) {
+          videoContainer.requestFullscreen().then(lockLandscape).catch(function () {
+            enableFakeFullscreen();
+          });
           return;
         }
 
-        if (target.webkitRequestFullscreen) {
-          target.webkitRequestFullscreen();
+        if (videoContainer.webkitRequestFullscreen) {
+          videoContainer.webkitRequestFullscreen();
           lockLandscape();
+          setTimeout(updateFullscreenButton, 150);
           return;
         }
 
-        if (target.msRequestFullscreen) {
-          target.msRequestFullscreen();
+        if (videoContainer.msRequestFullscreen) {
+          videoContainer.msRequestFullscreen();
           lockLandscape();
+          setTimeout(updateFullscreenButton, 150);
+          return;
+        }
+
+        enableFakeFullscreen();
+      } catch (error) {
+        enableFakeFullscreen();
+      }
+    }
+
+    function exitFullscreen() {
+      try {
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(function () {});
+          return;
+        }
+
+        if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+          return;
         }
       } catch (error) {}
+
+      disableFakeFullscreen();
+    }
+
+    function enableFakeFullscreen() {
+      fakeFullscreenActive = true;
+      videoContainer.classList.add("fake-fullscreen");
+      lockLandscape();
+      updateFullscreenButton();
+    }
+
+    function disableFakeFullscreen() {
+      fakeFullscreenActive = false;
+      videoContainer.classList.remove("fake-fullscreen");
+      updateFullscreenButton();
+    }
+
+    function isCurrentlyFullscreen() {
+      return !!document.fullscreenElement || !!document.webkitFullscreenElement || fakeFullscreenActive;
+    }
+
+    function updateFullscreenButton() {
+      if (isCurrentlyFullscreen()) {
+        fullscreenLabel.textContent = "Voltar";
+        fullscreenIconPath.setAttribute("d", BACK_ICON);
+      } else {
+        fakeFullscreenActive = false;
+        videoContainer.classList.remove("fake-fullscreen");
+        fullscreenLabel.textContent = "Tela cheia";
+        fullscreenIconPath.setAttribute("d", EXPAND_ICON);
+      }
     }
 
     function lockLandscape() {
