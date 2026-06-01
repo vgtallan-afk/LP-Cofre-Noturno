@@ -7,6 +7,17 @@
   <title>Sua cabeça liga justamente quando você tenta dormir?</title>
 
   <style>
+    :root {
+      --lavanda-escuro: #2B2447;
+      --lavanda-medio: #4B3F72;
+      --lavanda-principal: #7E6BAE;
+      --lavanda-claro: #BDADE0;
+      --lavanda-branco: #F3ECF7;
+      --amarelo-alerta: #FFD84D;
+      --verde-cta: #17C964;
+      --verde-cta-2: #0AAE55;
+    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html { scroll-behavior: smooth; }
 
@@ -14,9 +25,10 @@
       width: 100%;
       min-height: 100vh;
       background:
-        radial-gradient(circle at top, rgba(45, 60, 105, 0.42), transparent 34%),
-        linear-gradient(180deg, #050816 0%, #02030a 46%, #000 100%);
-      color: #fff;
+        radial-gradient(circle at top, rgba(126, 107, 174, 0.35), transparent 32%),
+        radial-gradient(circle at 20% 15%, rgba(189, 173, 224, 0.16), transparent 22%),
+        linear-gradient(180deg, #17122A 0%, var(--lavanda-escuro) 42%, #080611 100%);
+      color: var(--lavanda-branco);
       font-family: Arial, Helvetica, sans-serif;
       overflow-x: hidden;
     }
@@ -49,18 +61,20 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
+      gap: 7px;
       margin-bottom: 14px;
       padding: 9px 15px;
-      border: 1px solid rgba(255,255,255,0.16);
+      border: 1px solid rgba(243, 236, 247, 0.18);
       border-radius: 999px;
-      background: rgba(255,255,255,0.06);
-      color: #d7ddff;
+      background: rgba(75, 63, 114, 0.42);
+      color: var(--lavanda-branco);
       font-size: 14px;
       line-height: 1.2;
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 0.02em;
       text-align: center;
       backdrop-filter: blur(12px);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.18);
     }
 
     h1 {
@@ -68,12 +82,19 @@
       max-width: 900px;
       margin: 0 auto 14px;
       text-align: center;
-      color: #fff;
+      color: var(--lavanda-branco);
       font-size: clamp(30px, 5vw, 58px);
       line-height: 1;
       letter-spacing: -0.055em;
-      font-weight: 900;
+      font-weight: 950;
       text-wrap: balance;
+      text-shadow: 0 18px 60px rgba(0,0,0,0.36);
+    }
+
+    .yellow-highlight {
+      color: var(--amarelo-alerta);
+      text-shadow: 0 0 24px rgba(255, 216, 77, 0.18);
+      white-space: nowrap;
     }
 
     .subheadline {
@@ -81,7 +102,7 @@
       max-width: 760px;
       margin: 0 auto 22px;
       text-align: center;
-      color: rgba(255,255,255,0.78);
+      color: rgba(243, 236, 247, 0.80);
       font-size: clamp(16px, 2vw, 22px);
       line-height: 1.38;
       font-weight: 500;
@@ -102,18 +123,19 @@
       padding: 10px;
       border-radius: 28px;
       background:
-        linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0.04)),
-        rgba(255,255,255,0.045);
-      border: 1px solid rgba(255,255,255,0.13);
+        linear-gradient(135deg, rgba(243,236,247,0.18), rgba(126,107,174,0.08)),
+        rgba(43, 36, 71, 0.78);
+      border: 1px solid rgba(243,236,247,0.16);
       box-shadow:
         0 28px 80px rgba(0,0,0,0.46),
-        0 0 70px rgba(87,109,255,0.13);
+        0 0 80px rgba(126,107,174,0.20);
       display: flex;
       flex-direction: column;
       align-items: stretch;
     }
 
-    #video-shell:fullscreen {
+    #video-shell:fullscreen,
+    #video-shell:-webkit-full-screen {
       width: 100vw;
       height: 100vh;
       max-width: none;
@@ -122,6 +144,34 @@
       border: 0;
       background: #000;
       box-shadow: none;
+    }
+
+    #video-shell.fake-fullscreen {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      z-index: 999999;
+      width: 100svh;
+      height: 100svw;
+      max-width: none;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      transform: translate(-50%, -50%) rotate(90deg);
+      transform-origin: center;
+      background: #000;
+      box-shadow: none;
+      display: block;
+    }
+
+    @media (orientation: landscape) {
+      #video-shell.fake-fullscreen {
+        top: 0;
+        left: 0;
+        width: 100svw;
+        height: 100svh;
+        transform: none;
+      }
     }
 
     #video-container {
@@ -135,36 +185,13 @@
       cursor: pointer;
     }
 
-    #video-shell:fullscreen #video-container {
+    #video-shell:fullscreen #video-container,
+    #video-shell:-webkit-full-screen #video-container,
+    #video-shell.fake-fullscreen #video-container {
       width: 100%;
       height: 100%;
       aspect-ratio: auto;
       border-radius: 0;
-    }
-
-    #video-container.fake-fullscreen {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      z-index: 999999;
-      width: 100svh;
-      height: 100svw;
-      max-width: none;
-      aspect-ratio: auto;
-      border-radius: 0;
-      transform: translate(-50%, -50%) rotate(90deg);
-      background: #000;
-      box-shadow: none;
-    }
-
-    @media (orientation: landscape) {
-      #video-container.fake-fullscreen {
-        top: 0;
-        left: 0;
-        width: 100svw;
-        height: 100svh;
-        transform: none;
-      }
     }
 
     #vimeo-player {
@@ -179,7 +206,7 @@
     }
 
     @media (orientation: portrait) {
-      #video-container.fake-fullscreen #vimeo-player {
+      #video-shell.fake-fullscreen #vimeo-player {
         width: 100%;
         height: 56.25svh;
         top: 50%;
@@ -189,7 +216,7 @@
     }
 
     @media (orientation: landscape) {
-      #video-container.fake-fullscreen #vimeo-player {
+      #video-shell.fake-fullscreen #vimeo-player {
         width: 100%;
         height: 56.25svw;
         top: 50%;
@@ -215,8 +242,8 @@
     #start-overlay {
       cursor: pointer;
       background:
-        radial-gradient(circle at center, rgba(255,255,255,0.12), transparent 28%),
-        rgba(0,0,0,0.38);
+        radial-gradient(circle at center, rgba(189,173,224,0.16), transparent 28%),
+        rgba(43,36,71,0.42);
     }
 
     #pause-overlay {
@@ -247,8 +274,8 @@
       width: 86px;
       height: 86px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.14);
-      border: 2.5px solid rgba(255,255,255,0.78);
+      background: rgba(243,236,247,0.14);
+      border: 2.5px solid rgba(243,236,247,0.78);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -267,7 +294,7 @@
       max-width: 340px;
       font-size: 16px;
       font-weight: 800;
-      color: rgba(255,255,255,0.94);
+      color: rgba(243,236,247,0.96);
       letter-spacing: 0.015em;
       text-shadow: 0 1px 10px rgba(0,0,0,0.95);
       text-align: center;
@@ -351,10 +378,10 @@
       justify-content: center;
       gap: 7px;
       padding: 10px 13px;
-      border: 1px solid rgba(255,255,255,0.22);
+      border: 1px solid rgba(243,236,247,0.22);
       border-radius: 999px;
-      background: rgba(0,0,0,0.58);
-      color: #fff;
+      background: rgba(43,36,71,0.78);
+      color: var(--lavanda-branco);
       font-size: 13px;
       font-weight: 900;
       line-height: 1;
@@ -364,8 +391,10 @@
       transition: transform 0.15s ease, background 0.15s ease, opacity 0.2s ease;
     }
 
-    #fullscreen-button.fullscreen-active {
-      position: fixed;
+    #video-shell.fake-fullscreen #fullscreen-button,
+    #video-shell:fullscreen #fullscreen-button,
+    #video-shell:-webkit-full-screen #fullscreen-button {
+      position: absolute;
       right: calc(env(safe-area-inset-right, 0px) + 18px);
       bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
       margin: 0;
@@ -375,7 +404,7 @@
     }
 
     #fullscreen-button.cta-mode {
-      background: linear-gradient(135deg, #17c964, #0aae55);
+      background: linear-gradient(135deg, var(--verde-cta), var(--verde-cta-2)) !important;
       color: #031208;
       border-color: rgba(255,255,255,0.22);
       animation: floatingCtaPulse 1.1s ease-in-out infinite;
@@ -386,11 +415,11 @@
 
     #fullscreen-button:hover {
       transform: translateY(-1px);
-      background: rgba(255,255,255,0.16);
+      background: rgba(126,107,174,0.58);
     }
 
     #fullscreen-button.cta-mode:hover {
-      background: linear-gradient(135deg, #20df73, #10bd60);
+      background: linear-gradient(135deg, #20df73, #10bd60) !important;
       transform: scale(1.05);
     }
 
@@ -407,7 +436,7 @@
       z-index: 15;
       width: 100%;
       height: 10px;
-      background: rgba(255,255,255,0.14);
+      background: rgba(243,236,247,0.14);
       overflow: hidden;
       border-radius: 0;
       pointer-events: none;
@@ -416,8 +445,8 @@
     #progress-bar-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, #526bff, #8ea2ff, #ffffff);
-      box-shadow: 0 0 14px rgba(142,162,255,0.68);
+      background: linear-gradient(90deg, var(--lavanda-principal), var(--lavanda-claro), var(--lavanda-branco));
+      box-shadow: 0 0 14px rgba(189,173,224,0.68);
       transition: width 0.16s linear;
     }
 
@@ -457,7 +486,7 @@
       min-height: 62px;
       padding: 16px 22px;
       border-radius: 999px;
-      background: linear-gradient(135deg, #17c964, #0aae55);
+      background: linear-gradient(135deg, var(--verde-cta), var(--verde-cta-2));
       color: #031208;
       font-size: clamp(18px, 2.4vw, 22px);
       font-weight: 950;
@@ -476,7 +505,7 @@
     }
 
     .cta-helper {
-      color: rgba(255,255,255,0.62);
+      color: rgba(243,236,247,0.62);
       font-size: 13px;
       text-align: center;
       line-height: 1.35;
@@ -490,7 +519,7 @@
       gap: 10px;
       margin-top: 34px;
       padding-top: 20px;
-      color: rgba(255,255,255,0.56);
+      color: rgba(243,236,247,0.56);
       font-size: 13px;
       text-align: center;
     }
@@ -504,7 +533,7 @@
     }
 
     .footer-links a {
-      color: rgba(255,255,255,0.68);
+      color: rgba(243,236,247,0.72);
       text-decoration: underline;
       text-underline-offset: 3px;
     }
@@ -519,8 +548,8 @@
       justify-content: center;
       padding: 24px;
       background:
-        radial-gradient(circle at top, rgba(45, 60, 105, 0.32), transparent 34%),
-        linear-gradient(180deg, #050816 0%, #000 100%);
+        radial-gradient(circle at top, rgba(126,107,174,0.32), transparent 34%),
+        linear-gradient(180deg, #17122A 0%, #080611 100%);
       color: #fff;
       text-align: center;
       font-family: Arial, Helvetica, sans-serif;
@@ -530,8 +559,8 @@
       width: min(100%, 620px);
       padding: 34px 24px;
       border-radius: 30px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.055);
+      border: 1px solid rgba(243,236,247,0.14);
+      background: rgba(75,63,114,0.22);
       box-shadow: 0 24px 80px rgba(0,0,0,0.42);
       backdrop-filter: blur(14px);
     }
@@ -546,7 +575,7 @@
     .lost-card p {
       max-width: 460px;
       margin: 0 auto;
-      color: rgba(255,255,255,0.76);
+      color: rgba(243,236,247,0.78);
       font-size: clamp(16px, 2.4vw, 21px);
       line-height: 1.35;
       font-weight: 700;
@@ -557,8 +586,8 @@
       margin-top: 24px;
       padding: 13px 18px;
       border-radius: 999px;
-      background: #fff;
-      color: #050816;
+      background: var(--lavanda-branco);
+      color: var(--lavanda-escuro);
       font-size: 14px;
       font-weight: 900;
       cursor: pointer;
@@ -567,10 +596,10 @@
 
     @keyframes pulse {
       0%, 100% {
-        box-shadow: 0 0 0 0 rgba(255,255,255,0.22), 0 14px 50px rgba(0,0,0,0.36);
+        box-shadow: 0 0 0 0 rgba(243,236,247,0.22), 0 14px 50px rgba(0,0,0,0.36);
       }
       50% {
-        box-shadow: 0 0 0 13px rgba(255,255,255,0), 0 14px 50px rgba(0,0,0,0.36);
+        box-shadow: 0 0 0 13px rgba(243,236,247,0), 0 14px 50px rgba(0,0,0,0.36);
       }
     }
 
@@ -611,8 +640,9 @@
       .eyebrow { font-size: 13px; }
       h1 { font-size: clamp(29px, 9vw, 42px); }
       #video-shell { padding: 7px; border-radius: 23px; }
+      #video-shell.fake-fullscreen { padding: 0; border-radius: 0; }
       #video-container { border-radius: 17px; }
-      #video-container.fake-fullscreen { border-radius: 0; }
+      #video-shell.fake-fullscreen #video-container { border-radius: 0; }
       .overlay-icon { width: 74px; height: 74px; }
       .overlay-icon svg { width: 34px; height: 34px; }
 
@@ -623,7 +653,9 @@
         font-size: 12px;
       }
 
-      #fullscreen-button.fullscreen-active {
+      #video-shell.fake-fullscreen #fullscreen-button,
+      #video-shell:fullscreen #fullscreen-button,
+      #video-shell:-webkit-full-screen #fullscreen-button {
         right: calc(env(safe-area-inset-right, 0px) + 14px);
         bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
         padding: 10px 14px;
@@ -645,9 +677,9 @@
 <body>
   <main id="main-page" class="page">
     <section class="content">
-      <div class="eyebrow">Assista antes de tentar dormir hoje</div>
+      <div class="eyebrow">⚠️ Assista antes de dormir hoje</div>
 
-      <h1>Sua cabeça liga justamente quando você tenta dormir?</h1>
+      <h1>Sua cabeça liga justamente quando você <span class="yellow-highlight">tenta dormir?</span></h1>
 
       <p class="subheadline">
         Assista ao vídeo e descubra por que isso acontece — e como tirar da mente aquilo que fica rodando antes de dormir.
@@ -744,7 +776,6 @@
     const startOverlay = document.getElementById("start-overlay");
     const pauseOverlay = document.getElementById("pause-overlay");
     const videoShell = document.getElementById("video-shell");
-    const videoContainer = document.getElementById("video-container");
     const fullscreenButton = document.getElementById("fullscreen-button");
     const fullscreenLabel = document.getElementById("fullscreen-label");
     const fullscreenIconPath = document.getElementById("fullscreen-icon-path");
@@ -855,7 +886,8 @@
       startFromBeginningWithSound();
     });
 
-    videoContainer.addEventListener("click", function () {
+    videoShell.addEventListener("click", function (event) {
+      if (event.target.closest("button")) return;
       if (!hasUserStarted) return;
 
       if (isPlaying) {
@@ -1090,7 +1122,7 @@
 
     function enableFakeFullscreen() {
       fakeFullscreenActive = true;
-      videoContainer.classList.add("fake-fullscreen");
+      videoShell.classList.add("fake-fullscreen");
       document.body.classList.add("no-scroll");
       lockLandscape();
       updateFullscreenButton();
@@ -1098,7 +1130,7 @@
 
     function disableFakeFullscreen() {
       fakeFullscreenActive = false;
-      videoContainer.classList.remove("fake-fullscreen");
+      videoShell.classList.remove("fake-fullscreen");
       document.body.classList.remove("no-scroll");
       updateFullscreenButton();
     }
@@ -1109,8 +1141,6 @@
 
     function updateFullscreenButton() {
       const full = isCurrentlyFullscreen();
-
-      fullscreenButton.classList.toggle("fullscreen-active", full);
 
       if (full && ctaShown) {
         fullscreenButton.classList.add("cta-mode");
@@ -1128,7 +1158,7 @@
         fullscreenButton.setAttribute("aria-label", "Voltar para a tela normal");
       } else {
         fakeFullscreenActive = false;
-        videoContainer.classList.remove("fake-fullscreen");
+        videoShell.classList.remove("fake-fullscreen");
         document.body.classList.remove("no-scroll");
         fullscreenLabel.textContent = "Tela cheia";
         fullscreenIconPath.setAttribute("d", EXPAND_ICON);
