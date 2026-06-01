@@ -4,15 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
-  <title>Sua cabeça liga justamente quando você tenta dormir?</title>
+
+  <title>Sono Blindado</title>
+
+  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" rx="22" fill="%230A1F33"/%3E%3Cpath d="M64 12C49 16 38 31 38 49c0 22 18 40 40 40 4 0 8-1 12-2C82 96 69 100 55 100 27 100 5 78 5 50S27 0 55 0c14 0 27 5 36 14-8-3-18-5-27-2z" fill="%23E6F3F8"/%3E%3Ccircle cx="33" cy="24" r="4" fill="%23A7D1E6"/%3E%3Ccircle cx="25" cy="43" r="2.6" fill="%23A7D1E6"/%3E%3Ccircle cx="47" cy="19" r="2" fill="%23A7D1E6"/%3E%3C/svg%3E'>
 
   <style>
     :root {
-      --lavanda-escuro: #2B2447;
-      --lavanda-medio: #4B3F72;
-      --lavanda-principal: #7E6BAE;
-      --lavanda-claro: #BDADE0;
-      --lavanda-branco: #F3ECF7;
+      --azul-escuro: #0A1F33;
+      --azul-medio: #15466B;
+      --azul-principal: #2E6F95;
+      --azul-claro: #A7D1E6;
+      --azul-branco: #E6F3F8;
       --amarelo-alerta: #FFD84D;
       --verde-cta: #17C964;
       --verde-cta-2: #0AAE55;
@@ -25,10 +28,10 @@
       width: 100%;
       min-height: 100vh;
       background:
-        radial-gradient(circle at top, rgba(126, 107, 174, 0.35), transparent 32%),
-        radial-gradient(circle at 20% 15%, rgba(189, 173, 224, 0.16), transparent 22%),
-        linear-gradient(180deg, #17122A 0%, var(--lavanda-escuro) 42%, #080611 100%);
-      color: var(--lavanda-branco);
+        radial-gradient(circle at top, rgba(46, 111, 149, 0.38), transparent 32%),
+        radial-gradient(circle at 20% 15%, rgba(167, 209, 230, 0.14), transparent 22%),
+        linear-gradient(180deg, #071827 0%, var(--azul-escuro) 42%, #02080F 100%);
+      color: var(--azul-branco);
       font-family: Arial, Helvetica, sans-serif;
       overflow-x: hidden;
     }
@@ -64,10 +67,10 @@
       gap: 7px;
       margin-bottom: 14px;
       padding: 9px 15px;
-      border: 1px solid rgba(243, 236, 247, 0.18);
+      border: 1px solid rgba(230, 243, 248, 0.18);
       border-radius: 999px;
-      background: rgba(75, 63, 114, 0.42);
-      color: var(--lavanda-branco);
+      background: rgba(21, 70, 107, 0.44);
+      color: var(--azul-branco);
       font-size: 14px;
       line-height: 1.2;
       font-weight: 800;
@@ -82,7 +85,7 @@
       max-width: 900px;
       margin: 0 auto 14px;
       text-align: center;
-      color: var(--lavanda-branco);
+      color: var(--azul-branco);
       font-size: clamp(30px, 5vw, 58px);
       line-height: 1;
       letter-spacing: -0.055em;
@@ -102,7 +105,7 @@
       max-width: 760px;
       margin: 0 auto 22px;
       text-align: center;
-      color: rgba(243, 236, 247, 0.80);
+      color: rgba(230, 243, 248, 0.82);
       font-size: clamp(16px, 2vw, 22px);
       line-height: 1.38;
       font-weight: 500;
@@ -123,12 +126,12 @@
       padding: 10px;
       border-radius: 28px;
       background:
-        linear-gradient(135deg, rgba(243,236,247,0.18), rgba(126,107,174,0.08)),
-        rgba(43, 36, 71, 0.78);
-      border: 1px solid rgba(243,236,247,0.16);
+        linear-gradient(135deg, rgba(230,243,248,0.18), rgba(46,111,149,0.10)),
+        rgba(10, 31, 51, 0.82);
+      border: 1px solid rgba(230,243,248,0.16);
       box-shadow:
         0 28px 80px rgba(0,0,0,0.46),
-        0 0 80px rgba(126,107,174,0.20);
+        0 0 80px rgba(46,111,149,0.22);
       display: flex;
       flex-direction: column;
       align-items: stretch;
@@ -242,8 +245,8 @@
     #start-overlay {
       cursor: pointer;
       background:
-        radial-gradient(circle at center, rgba(189,173,224,0.16), transparent 28%),
-        rgba(43,36,71,0.42);
+        radial-gradient(circle at center, rgba(167,209,230,0.16), transparent 28%),
+        rgba(10,31,51,0.42);
     }
 
     #pause-overlay {
@@ -274,8 +277,8 @@
       width: 86px;
       height: 86px;
       border-radius: 50%;
-      background: rgba(243,236,247,0.14);
-      border: 2.5px solid rgba(243,236,247,0.78);
+      background: rgba(230,243,248,0.14);
+      border: 2.5px solid rgba(230,243,248,0.78);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -294,7 +297,7 @@
       max-width: 340px;
       font-size: 16px;
       font-weight: 800;
-      color: rgba(243,236,247,0.96);
+      color: rgba(230,243,248,0.96);
       letter-spacing: 0.015em;
       text-shadow: 0 1px 10px rgba(0,0,0,0.95);
       text-align: center;
@@ -378,10 +381,10 @@
       justify-content: center;
       gap: 7px;
       padding: 10px 13px;
-      border: 1px solid rgba(243,236,247,0.22);
+      border: 1px solid rgba(230,243,248,0.22);
       border-radius: 999px;
-      background: rgba(43,36,71,0.78);
-      color: var(--lavanda-branco);
+      background: rgba(10,31,51,0.82);
+      color: var(--azul-branco);
       font-size: 13px;
       font-weight: 900;
       line-height: 1;
@@ -415,7 +418,7 @@
 
     #fullscreen-button:hover {
       transform: translateY(-1px);
-      background: rgba(126,107,174,0.58);
+      background: rgba(46,111,149,0.65);
     }
 
     #fullscreen-button.cta-mode:hover {
@@ -436,7 +439,7 @@
       z-index: 15;
       width: 100%;
       height: 10px;
-      background: rgba(243,236,247,0.14);
+      background: rgba(230,243,248,0.14);
       overflow: hidden;
       border-radius: 0;
       pointer-events: none;
@@ -445,8 +448,8 @@
     #progress-bar-fill {
       height: 100%;
       width: 0%;
-      background: linear-gradient(90deg, var(--lavanda-principal), var(--lavanda-claro), var(--lavanda-branco));
-      box-shadow: 0 0 14px rgba(189,173,224,0.68);
+      background: linear-gradient(90deg, var(--azul-principal), var(--azul-claro), var(--azul-branco));
+      box-shadow: 0 0 14px rgba(167,209,230,0.68);
       transition: width 0.16s linear;
     }
 
@@ -505,7 +508,7 @@
     }
 
     .cta-helper {
-      color: rgba(243,236,247,0.62);
+      color: rgba(230,243,248,0.62);
       font-size: 13px;
       text-align: center;
       line-height: 1.35;
@@ -519,7 +522,7 @@
       gap: 10px;
       margin-top: 34px;
       padding-top: 20px;
-      color: rgba(243,236,247,0.56);
+      color: rgba(230,243,248,0.56);
       font-size: 13px;
       text-align: center;
     }
@@ -533,7 +536,7 @@
     }
 
     .footer-links a {
-      color: rgba(243,236,247,0.72);
+      color: rgba(230,243,248,0.72);
       text-decoration: underline;
       text-underline-offset: 3px;
     }
@@ -548,8 +551,8 @@
       justify-content: center;
       padding: 24px;
       background:
-        radial-gradient(circle at top, rgba(126,107,174,0.32), transparent 34%),
-        linear-gradient(180deg, #17122A 0%, #080611 100%);
+        radial-gradient(circle at top, rgba(46,111,149,0.34), transparent 34%),
+        linear-gradient(180deg, #071827 0%, #02080F 100%);
       color: #fff;
       text-align: center;
       font-family: Arial, Helvetica, sans-serif;
@@ -559,8 +562,8 @@
       width: min(100%, 620px);
       padding: 34px 24px;
       border-radius: 30px;
-      border: 1px solid rgba(243,236,247,0.14);
-      background: rgba(75,63,114,0.22);
+      border: 1px solid rgba(230,243,248,0.14);
+      background: rgba(21,70,107,0.24);
       box-shadow: 0 24px 80px rgba(0,0,0,0.42);
       backdrop-filter: blur(14px);
     }
@@ -575,7 +578,7 @@
     .lost-card p {
       max-width: 460px;
       margin: 0 auto;
-      color: rgba(243,236,247,0.78);
+      color: rgba(230,243,248,0.78);
       font-size: clamp(16px, 2.4vw, 21px);
       line-height: 1.35;
       font-weight: 700;
@@ -586,8 +589,8 @@
       margin-top: 24px;
       padding: 13px 18px;
       border-radius: 999px;
-      background: var(--lavanda-branco);
-      color: var(--lavanda-escuro);
+      background: var(--azul-branco);
+      color: var(--azul-escuro);
       font-size: 14px;
       font-weight: 900;
       cursor: pointer;
@@ -596,10 +599,10 @@
 
     @keyframes pulse {
       0%, 100% {
-        box-shadow: 0 0 0 0 rgba(243,236,247,0.22), 0 14px 50px rgba(0,0,0,0.36);
+        box-shadow: 0 0 0 0 rgba(230,243,248,0.22), 0 14px 50px rgba(0,0,0,0.36);
       }
       50% {
-        box-shadow: 0 0 0 13px rgba(243,236,247,0), 0 14px 50px rgba(0,0,0,0.36);
+        box-shadow: 0 0 0 13px rgba(230,243,248,0), 0 14px 50px rgba(0,0,0,0.36);
       }
     }
 
@@ -694,7 +697,7 @@
               allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
               referrerpolicy="strict-origin-when-cross-origin"
               allowfullscreen
-              title="VSL Cofre Noturno">
+              title="Sono Blindado">
             </iframe>
 
             <div id="start-overlay">
