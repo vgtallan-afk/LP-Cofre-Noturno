@@ -4,20 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
-
   <title>Sua cabeça liga justamente quando você tenta dormir?</title>
 
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html {
-      scroll-behavior: smooth;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
       width: 100%;
       min-height: 100vh;
@@ -28,11 +19,7 @@
       font-family: Arial, Helvetica, sans-serif;
       overflow-x: hidden;
     }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
+    a { color: inherit; text-decoration: none; }
 
     .page {
       width: 100%;
@@ -148,7 +135,7 @@
     #overlay {
       position: absolute;
       inset: 0;
-      z-index: 2;
+      z-index: 4;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -157,7 +144,7 @@
       padding: 24px;
       background:
         radial-gradient(circle at center, rgba(255,255,255,0.12), transparent 28%),
-        rgba(0,0,0,0.34);
+        rgba(0,0,0,0.38);
       transition: opacity 0.28s ease;
     }
 
@@ -167,8 +154,8 @@
     }
 
     .overlay-icon {
-      width: 84px;
-      height: 84px;
+      width: 86px;
+      height: 86px;
       border-radius: 50%;
       background: rgba(255,255,255,0.14);
       border: 2.5px solid rgba(255,255,255,0.78);
@@ -187,13 +174,13 @@
     }
 
     .overlay-icon svg {
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       fill: #fff;
     }
 
     .overlay-label {
-      max-width: 320px;
+      max-width: 340px;
       font-size: 16px;
       font-weight: 800;
       color: rgba(255,255,255,0.94);
@@ -201,6 +188,49 @@
       text-shadow: 0 1px 10px rgba(0,0,0,0.95);
       text-align: center;
       line-height: 1.28;
+    }
+
+    .overlay-small {
+      max-width: 360px;
+      color: rgba(255,255,255,0.72);
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.35;
+    }
+
+    #fullscreen-button {
+      position: absolute;
+      right: 14px;
+      bottom: 14px;
+      z-index: 5;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 13px;
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 999px;
+      background: rgba(0,0,0,0.58);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.26);
+      transition: transform 0.15s ease, background 0.15s ease, opacity 0.2s ease;
+    }
+
+    #fullscreen-button:hover {
+      transform: translateY(-1px);
+      background: rgba(255,255,255,0.16);
+    }
+
+    #fullscreen-button svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
     }
 
     #progress-bar-track {
@@ -217,7 +247,7 @@
       width: 0%;
       background: linear-gradient(90deg, #526bff, #8ea2ff, #ffffff);
       box-shadow: 0 0 14px rgba(142,162,255,0.68);
-      transition: width 0.05s linear;
+      transition: width 0.16s linear;
     }
 
     .cta-area {
@@ -226,6 +256,25 @@
       flex-direction: column;
       align-items: center;
       gap: 11px;
+      opacity: 1;
+      transform: translateY(0);
+      transition: opacity 0.45s ease, transform 0.45s ease, max-height 0.45s ease, margin-top 0.45s ease;
+    }
+
+    .cta-hidden {
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      max-height: 0;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .cta-visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      max-height: 220px;
       margin-top: 22px;
     }
 
@@ -234,12 +283,12 @@
       align-items: center;
       justify-content: center;
       width: min(100%, 430px);
-      min-height: 58px;
+      min-height: 62px;
       padding: 16px 22px;
       border-radius: 999px;
       background: linear-gradient(135deg, #17c964, #0aae55);
       color: #031208;
-      font-size: clamp(17px, 2.4vw, 21px);
+      font-size: clamp(18px, 2.4vw, 22px);
       font-weight: 950;
       text-align: center;
       box-shadow:
@@ -271,35 +320,18 @@
     }
 
     @media (max-width: 640px) {
-      .page {
-        padding: 18px 12px 34px;
-      }
-
-      .eyebrow {
-        font-size: 13px;
-      }
-
-      h1 {
-        font-size: clamp(29px, 9vw, 42px);
-      }
-
-      .video-shell {
-        padding: 7px;
-        border-radius: 23px;
-      }
-
-      #video-container {
-        border-radius: 17px;
-      }
-
-      .overlay-icon {
-        width: 72px;
-        height: 72px;
-      }
-
-      .overlay-icon svg {
-        width: 32px;
-        height: 32px;
+      .page { padding: 18px 12px 34px; }
+      .eyebrow { font-size: 13px; }
+      h1 { font-size: clamp(29px, 9vw, 42px); }
+      .video-shell { padding: 7px; border-radius: 23px; }
+      #video-container { border-radius: 17px; }
+      .overlay-icon { width: 74px; height: 74px; }
+      .overlay-icon svg { width: 34px; height: 34px; }
+      #fullscreen-button {
+        right: 10px;
+        bottom: 10px;
+        padding: 9px 11px;
+        font-size: 12px;
       }
     }
   </style>
@@ -316,14 +348,14 @@
         Assista ao vídeo e descubra por que isso acontece — e como tirar da mente aquilo que fica rodando antes de dormir.
       </p>
 
-      <p class="watch-note">Toque no vídeo para assistir em tela cheia com som</p>
+      <p class="watch-note">Toque no play para assistir com som desde o começo</p>
 
       <div id="vsl-wrapper">
         <div class="video-shell">
           <div id="video-container" aria-label="Toque para assistir ao vídeo">
             <iframe
               id="vimeo-player"
-              src="https://player.vimeo.com/video/1197201080?autoplay=1&muted=1&controls=0&title=0&byline=0&portrait=0&badge=0&autopause=0&playsinline=1&dnt=1"
+              src="https://player.vimeo.com/video/1197201080?autoplay=1&muted=1&controls=0&title=0&byline=0&portrait=0&badge=0&autopause=0&playsinline=1&dnt=1&background=0"
               allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
               referrerpolicy="strict-origin-when-cross-origin"
               allowfullscreen
@@ -331,13 +363,21 @@
             </iframe>
 
             <div id="overlay">
-              <div class="overlay-icon">
+              <div class="overlay-icon" aria-hidden="true">
                 <svg id="icon-svg" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                  <path d="M8 5v14l11-7z"/>
                 </svg>
               </div>
-              <span class="overlay-label" id="overlay-text">Toque para ativar o som</span>
+              <span class="overlay-label" id="overlay-text">Toque para assistir com som</span>
+              <span class="overlay-small">O vídeo está rodando em prévia silenciosa. Ao tocar, ele começa do início com áudio.</span>
             </div>
+
+            <button id="fullscreen-button" type="button" aria-label="Assistir em tela cheia horizontal">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M5 5h6v2H8.41l3.3 3.29-1.42 1.42L7 8.41V11H5V5zm14 0v6h-2V8.41l-3.29 3.3-1.42-1.42 3.3-3.29H13V5h6zM5 19v-6h2v2.59l3.29-3.3 1.42 1.42-3.3 3.29H11v2H5zm14-6v6h-6v-2h2.59l-3.3-3.29 1.42-1.42 3.29 3.3V13h2z"/>
+              </svg>
+              Tela cheia
+            </button>
           </div>
 
           <div id="progress-bar-track">
@@ -346,9 +386,9 @@
         </div>
       </div>
 
-      <div class="cta-area">
+      <div id="cta-area" class="cta-area cta-hidden">
         <a class="cta-button" href="https://pay.hotmart.com/A105911517V?checkoutMode=10" target="_blank" rel="noopener">
-          Quero acessar agora
+          TESTAR O COFRE AGORA
         </a>
         <p class="cta-helper">Você será direcionado para o checkout seguro da Hotmart.</p>
       </div>
@@ -366,12 +406,15 @@
     const iconSvg = document.getElementById("icon-svg");
     const fill = document.getElementById("progress-bar-fill");
     const container = document.getElementById("video-container");
+    const fullscreenButton = document.getElementById("fullscreen-button");
+    const ctaArea = document.getElementById("cta-area");
 
-    let appState = "preview"; // preview | playing | paused
-    let totalSeconds = 119;
-    let progressElapsed = 0;
-    let progressStart = null;
-    let rafId = null;
+    const CTA_TIME_SECONDS = 13 * 60 + 30;
+    const DEFAULT_VIDEO_DURATION = 15 * 60 + 30;
+
+    let appState = "preview";
+    let totalSeconds = DEFAULT_VIDEO_DURATION;
+    let ctaShown = false;
 
     const ICONS = {
       volume: '<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>',
@@ -384,72 +427,159 @@
 
     player.ready().then(function () {
       player.setMuted(true);
+      player.setVolume(0);
       player.play().catch(function () {});
 
       player.getDuration().then(function (duration) {
         if (duration && duration > 0) totalSeconds = duration;
-      });
+      }).catch(function () {});
     });
 
     player.on("ended", function () {
       if (appState === "preview") {
-        player.setCurrentTime(0);
-        player.play().catch(function () {});
+        player.setCurrentTime(0).then(function () {
+          player.setMuted(true);
+          player.setVolume(0);
+          player.play().catch(function () {});
+        });
+        return;
       }
 
       if (appState === "playing") {
-        fill.style.width = "100%";
-        stopProgress();
+        updateFakeProgress(totalSeconds);
+      }
+    });
+
+    player.on("timeupdate", function (data) {
+      if (appState !== "playing") return;
+
+      const currentSeconds = data && data.seconds ? data.seconds : 0;
+      updateFakeProgress(currentSeconds);
+
+      if (currentSeconds >= CTA_TIME_SECONDS) {
+        showCTA();
       }
     });
 
     container.addEventListener("click", function () {
       if (appState === "preview") {
-        player.setCurrentTime(0).then(function () {
-          player.setMuted(false);
-          player.setVolume(1);
-          player.play();
-
-          appState = "playing";
-          overlay.classList.add("hidden");
-          startProgress();
-          requestVideoFullscreen();
-        }).catch(function () {
-          player.setMuted(false);
-          player.setVolume(1);
-          player.play();
-
-          appState = "playing";
-          overlay.classList.add("hidden");
-          startProgress();
-          requestVideoFullscreen();
-        });
-
+        startVideoWithSound(false);
         return;
       }
 
       if (appState === "playing") {
-        player.pause();
-
-        appState = "paused";
-        overlay.classList.remove("hidden");
-        setIcon("play");
-        overlayText.textContent = "Toque para continuar";
-        pauseProgress();
-
+        pauseVideo();
         return;
       }
 
       if (appState === "paused") {
-        player.play();
+        resumeVideo();
+      }
+    });
 
+    fullscreenButton.addEventListener("click", function (event) {
+      event.stopPropagation();
+
+      if (appState === "preview") {
+        startVideoWithSound(true);
+      } else {
+        requestVideoFullscreen();
+      }
+    });
+
+    function startVideoWithSound(alsoFullscreen) {
+      player.setCurrentTime(0).then(function () {
+        player.setMuted(false);
+        player.setVolume(1);
+        return player.play();
+      }).then(function () {
         appState = "playing";
         overlay.classList.add("hidden");
         setIcon("volume");
-        overlayText.textContent = "Toque para ativar o som";
-        resumeProgress();
+        overlayText.textContent = "Toque para assistir com som";
+        updateFakeProgress(0);
+
+        if (alsoFullscreen) requestVideoFullscreen();
+      }).catch(function () {
+        player.setMuted(false);
+        player.setVolume(1);
+        player.play().catch(function () {});
+
+        appState = "playing";
+        overlay.classList.add("hidden");
+        updateFakeProgress(0);
+
+        if (alsoFullscreen) requestVideoFullscreen();
+      });
+    }
+
+    function pauseVideo() {
+      player.pause();
+
+      appState = "paused";
+      overlay.classList.remove("hidden");
+      setIcon("play");
+      overlayText.textContent = "Toque para continuar";
+    }
+
+    function resumeVideo() {
+      player.play();
+
+      appState = "playing";
+      overlay.classList.add("hidden");
+      setIcon("volume");
+      overlayText.textContent = "Toque para assistir com som";
+    }
+
+    function showCTA() {
+      if (ctaShown) return;
+
+      ctaShown = true;
+      ctaArea.classList.remove("cta-hidden");
+      ctaArea.classList.add("cta-visible");
+    }
+
+    /*
+      Curva da barra falsa para vídeo de aproximadamente 15:30:
+      00:00  -> 0%
+      00:30  -> 25%
+      02:00  -> 35%
+      05:00  -> 50%
+      09:00  -> 68%
+      13:30  -> 88%   aparece o CTA
+      15:30+ -> 100%
+    */
+    function getFakePercent(seconds) {
+      const anchors = [
+        { t: 0, p: 0 },
+        { t: 30, p: 25 },
+        { t: 120, p: 35 },
+        { t: 300, p: 50 },
+        { t: 540, p: 68 },
+        { t: CTA_TIME_SECONDS, p: 88 },
+        { t: Math.max(totalSeconds, CTA_TIME_SECONDS + 60), p: 100 }
+      ];
+
+      const s = Math.max(0, seconds);
+
+      for (let i = 0; i < anchors.length - 1; i++) {
+        const a = anchors[i];
+        const b = anchors[i + 1];
+
+        if (s >= a.t && s <= b.t) {
+          const ratio = (s - a.t) / (b.t - a.t);
+          const eased = 1 - Math.pow(1 - ratio, 1.8);
+          return a.p + (b.p - a.p) * eased;
+        }
       }
-    });
+
+      return 100;
+    }
+
+    function updateFakeProgress(seconds) {
+      const percent = Math.min(100, getFakePercent(seconds));
+      fill.style.width = percent.toFixed(2) + "%";
+    }
 
     function requestVideoFullscreen() {
       try {
@@ -460,53 +590,11 @@
         } else if (container.msRequestFullscreen) {
           container.msRequestFullscreen();
         }
+
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock("landscape").catch(function () {});
+        }
       } catch (error) {}
-    }
-
-    function getPercent(t) {
-      t = Math.min(t, totalSeconds);
-      return Math.pow(t / totalSeconds, 0.38) * 100;
-    }
-
-    function tick(ts) {
-      if (progressStart === null) progressStart = ts;
-
-      const elapsed = progressElapsed + (ts - progressStart) / 1000;
-      fill.style.width = getPercent(elapsed).toFixed(2) + "%";
-
-      if (elapsed < totalSeconds) {
-        rafId = requestAnimationFrame(tick);
-      } else {
-        fill.style.width = "100%";
-      }
-    }
-
-    function startProgress() {
-      progressElapsed = 0;
-      progressStart = null;
-
-      if (rafId) cancelAnimationFrame(rafId);
-
-      fill.style.width = "0%";
-      rafId = requestAnimationFrame(tick);
-    }
-
-    function pauseProgress() {
-      if (rafId) cancelAnimationFrame(rafId);
-
-      if (progressStart !== null) {
-        progressElapsed += (performance.now() - progressStart) / 1000;
-        progressStart = null;
-      }
-    }
-
-    function resumeProgress() {
-      progressStart = null;
-      rafId = requestAnimationFrame(tick);
-    }
-
-    function stopProgress() {
-      if (rafId) cancelAnimationFrame(rafId);
     }
   </script>
 </body>
