@@ -16,7 +16,7 @@
       --azul-principal: #2E6F95;
       --azul-claro: #A7D1E6;
       --azul-branco: #E6F3F8;
-      --amarelo-alerta: #FFD84D;
+      --amarelo-alerta: #FFD000;
       --verde-cta: #17C964;
       --verde-cta-2: #0AAE55;
     }
@@ -426,6 +426,21 @@
       transform: scale(1.05);
     }
 
+    #fullscreen-button.fullscreen-hint:not(.cta-mode) {
+      animation: fullscreenHint 1.15s ease-in-out infinite;
+      background: linear-gradient(120deg, rgba(10,31,51,0.92), rgba(46,111,149,0.92), rgba(167,209,230,0.70), rgba(46,111,149,0.92), rgba(10,31,51,0.92));
+      background-size: 260% 260%;
+      border-color: rgba(230,243,248,0.44);
+      box-shadow:
+        0 12px 36px rgba(46,111,149,0.34),
+        0 0 0 0 rgba(167,209,230,0.36);
+    }
+
+    .eyebrow.attention-pulse {
+      animation: eyebrowPulse 1.45s ease-in-out infinite;
+    }
+
+
     #fullscreen-button svg {
       width: 16px;
       height: 16px;
@@ -522,8 +537,8 @@
       gap: 10px;
       margin-top: 34px;
       padding-top: 20px;
-      color: rgba(230,243,248,0.56);
-      font-size: 13px;
+      color: rgba(230,243,248,0.28);
+      font-size: 12px;
       text-align: center;
     }
 
@@ -536,12 +551,12 @@
     }
 
     .footer-links a {
-      color: rgba(230,243,248,0.72);
+      color: rgba(230,243,248,0.34);
       text-decoration: underline;
       text-underline-offset: 3px;
     }
 
-    .footer-links a:hover { color: #fff; }
+    .footer-links a:hover { color: rgba(230,243,248,0.58); }
 
     #lost-page {
       display: none;
@@ -595,6 +610,41 @@
       font-weight: 900;
       cursor: pointer;
       border: 0;
+    }
+
+
+    @keyframes eyebrowPulse {
+      0%, 100% {
+        transform: scale(1);
+        box-shadow:
+          0 12px 36px rgba(0,0,0,0.18),
+          0 0 0 0 rgba(255,208,0,0.20);
+        border-color: rgba(230,243,248,0.18);
+      }
+      50% {
+        transform: scale(1.035);
+        box-shadow:
+          0 16px 44px rgba(0,0,0,0.24),
+          0 0 0 9px rgba(255,208,0,0);
+        border-color: rgba(255,208,0,0.40);
+      }
+    }
+
+    @keyframes fullscreenHint {
+      0%, 100% {
+        transform: scale(1);
+        background-position: 0% 50%;
+        box-shadow:
+          0 12px 36px rgba(46,111,149,0.34),
+          0 0 0 0 rgba(167,209,230,0.36);
+      }
+      50% {
+        transform: scale(1.055);
+        background-position: 100% 50%;
+        box-shadow:
+          0 16px 44px rgba(167,209,230,0.38),
+          0 0 0 10px rgba(167,209,230,0);
+      }
     }
 
     @keyframes pulse {
@@ -680,7 +730,7 @@
 <body>
   <main id="main-page" class="page">
     <section class="content">
-      <div class="eyebrow">⚠️ Assista antes de dormir hoje</div>
+      <div id="eyebrow-alert" class="eyebrow attention-pulse">⚠️ Assista <span class="yellow-highlight">antes</span> de dormir hoje</div>
 
       <h1>Sua cabeça liga justamente quando você <span class="yellow-highlight">tenta dormir?</span></h1>
 
@@ -780,6 +830,7 @@
     const pauseOverlay = document.getElementById("pause-overlay");
     const videoShell = document.getElementById("video-shell");
     const fullscreenButton = document.getElementById("fullscreen-button");
+    const eyebrowAlert = document.getElementById("eyebrow-alert");
     const fullscreenLabel = document.getElementById("fullscreen-label");
     const fullscreenIconPath = document.getElementById("fullscreen-icon-path");
     const continueButton = document.getElementById("continue-button");
@@ -802,6 +853,7 @@
     let totalSeconds = DEFAULT_VIDEO_DURATION;
     let ctaShown = false;
     let fakeFullscreenActive = false;
+    let fullscreenHintTimer = null;
 
     function isMobileLike() {
       return window.matchMedia("(max-width: 768px)").matches ||
@@ -934,6 +986,8 @@
 
       hasUserStarted = true;
       isPlaying = true;
+      setEyebrowPulsing(false);
+      triggerFullscreenHint();
       startOverlay.classList.add("hidden");
       pauseOverlay.classList.remove("visible");
       pauseOverlay.classList.add("hidden");
@@ -960,6 +1014,8 @@
     function pauseVideoAndShowOverlay() {
       player.pause().catch(function () {});
       isPlaying = false;
+      setEyebrowPulsing(true);
+      stopFullscreenHint();
       pauseOverlay.classList.remove("hidden");
       pauseOverlay.classList.add("visible");
     }
@@ -967,6 +1023,9 @@
     function continueWatching() {
       pauseOverlay.classList.remove("visible");
       pauseOverlay.classList.add("hidden");
+
+      setEyebrowPulsing(false);
+      triggerFullscreenHint();
 
       player.setMuted(false).catch(function () {});
       player.setVolume(1).catch(function () {});
@@ -980,6 +1039,8 @@
     function restartWatching() {
       pauseOverlay.classList.remove("visible");
       pauseOverlay.classList.add("hidden");
+      setEyebrowPulsing(false);
+      triggerFullscreenHint();
       updateFakeProgress(0);
 
       player.setMuted(false).catch(function () {});
@@ -1058,6 +1119,7 @@
     }
 
     function requestVideoFullscreen() {
+      stopFullscreenHint();
       if (isMobileLike()) {
         enableFakeFullscreen();
         return;
@@ -1124,6 +1186,7 @@
     }
 
     function enableFakeFullscreen() {
+      stopFullscreenHint();
       fakeFullscreenActive = true;
       videoShell.classList.add("fake-fullscreen");
       document.body.classList.add("no-scroll");
@@ -1146,6 +1209,7 @@
       const full = isCurrentlyFullscreen();
 
       if (full && ctaShown) {
+        stopFullscreenHint();
         fullscreenButton.classList.add("cta-mode");
         fullscreenLabel.textContent = "TESTAR AGORA";
         fullscreenIconPath.setAttribute("d", CART_ICON);
@@ -1156,6 +1220,7 @@
       fullscreenButton.classList.remove("cta-mode");
 
       if (full) {
+        stopFullscreenHint();
         fullscreenLabel.textContent = "Voltar";
         fullscreenIconPath.setAttribute("d", BACK_ICON);
         fullscreenButton.setAttribute("aria-label", "Voltar para a tela normal");
@@ -1167,6 +1232,32 @@
         fullscreenIconPath.setAttribute("d", EXPAND_ICON);
         fullscreenButton.setAttribute("aria-label", "Assistir em tela cheia horizontal");
       }
+    }
+
+
+    function setEyebrowPulsing(shouldPulse) {
+      if (!eyebrowAlert) return;
+      eyebrowAlert.classList.toggle("attention-pulse", shouldPulse);
+    }
+
+    function triggerFullscreenHint() {
+      if (isCurrentlyFullscreen() || ctaShown) return;
+
+      stopFullscreenHint();
+      fullscreenButton.classList.add("fullscreen-hint");
+
+      fullscreenHintTimer = setTimeout(function () {
+        fullscreenButton.classList.remove("fullscreen-hint");
+        fullscreenHintTimer = null;
+      }, 9000);
+    }
+
+    function stopFullscreenHint() {
+      if (fullscreenHintTimer) {
+        clearTimeout(fullscreenHintTimer);
+        fullscreenHintTimer = null;
+      }
+      fullscreenButton.classList.remove("fullscreen-hint");
     }
 
     function lockLandscape() {
