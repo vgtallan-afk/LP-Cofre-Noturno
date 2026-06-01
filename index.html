@@ -25,6 +25,8 @@
       overflow: hidden;
       height: 100vh;
       touch-action: none;
+      overscroll-behavior: none;
+      background: #000;
     }
 
     a { color: inherit; text-decoration: none; }
@@ -120,6 +122,7 @@
       cursor: pointer;
     }
 
+    /* Fallback fake fullscreen para celulares que bloqueiam fullscreen real */
     #video-container.fake-fullscreen {
       position: fixed;
       top: 50%;
@@ -154,27 +157,6 @@
       z-index: 1;
       background: #000;
       pointer-events: none;
-    }
-
-    /* No mobile fullscreen fake, o iframe é levemente ampliado para preencher a tela toda. */
-    @media (orientation: portrait) {
-      #video-container.fake-fullscreen #vimeo-player {
-        width: 100%;
-        height: 56.25svh;
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-      }
-    }
-
-    @media (orientation: landscape) {
-      #video-container.fake-fullscreen #vimeo-player {
-        width: 100%;
-        height: 56.25svw;
-        top: 50%;
-        left: 0;
-        transform: translateY(-50%);
-      }
     }
 
     #start-overlay,
@@ -323,8 +305,8 @@
     #fullscreen-button {
       position: absolute;
       right: max(14px, env(safe-area-inset-right));
-      bottom: max(14px, env(safe-area-inset-bottom));
-      z-index: 20;
+      bottom: max(18px, env(safe-area-inset-bottom));
+      z-index: 30;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -332,7 +314,7 @@
       padding: 10px 13px;
       border: 1px solid rgba(255,255,255,0.22);
       border-radius: 999px;
-      background: rgba(0,0,0,0.64);
+      background: rgba(0,0,0,0.68);
       color: #fff;
       font-size: 13px;
       font-weight: 900;
@@ -343,10 +325,10 @@
       transition: transform 0.15s ease, background 0.15s ease, opacity 0.2s ease;
     }
 
-    #video-container.fake-fullscreen #fullscreen-button {
+    #video-container.fake-fullscreen #fullscreen-button,
+    #video-container:fullscreen #fullscreen-button {
       right: calc(env(safe-area-inset-right, 0px) + 18px);
       bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
-      z-index: 30;
     }
 
     #fullscreen-button:hover {
@@ -562,7 +544,7 @@
       .overlay-icon svg { width: 34px; height: 34px; }
       #fullscreen-button {
         right: 10px;
-        bottom: 14px;
+        bottom: 18px;
         padding: 9px 12px;
         font-size: 12px;
       }
@@ -593,7 +575,7 @@
           <div id="video-container" aria-label="Vídeo da VSL">
             <iframe
               id="vimeo-player"
-              src="https://player.vimeo.com/video/1197201080?autoplay=1&muted=1&controls=0&title=0&byline=0&portrait=0&badge=0&autopause=0&playsinline=1&dnt=1&background=0"
+              src="about:blank"
               allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
               referrerpolicy="strict-origin-when-cross-origin"
               allowfullscreen
@@ -674,6 +656,33 @@
 
   <script>
     const iframe = document.getElementById("vimeo-player");
+
+    function isMobileLike() {
+      return window.matchMedia("(max-width: 768px)").matches ||
+        /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    }
+
+    /*
+      Desktop: mantém prévia silenciosa automática.
+      Mobile: não inicia prévia automática. Isso aumenta muito a chance do áudio funcionar no primeiro toque.
+    */
+    const mobile = isMobileLike();
+    const vimeoParams = new URLSearchParams({
+      autoplay: mobile ? "0" : "1",
+      muted: mobile ? "0" : "1",
+      controls: "0",
+      title: "0",
+      byline: "0",
+      portrait: "0",
+      badge: "0",
+      autopause: "0",
+      playsinline: mobile ? "0" : "1",
+      dnt: "1",
+      background: "0"
+    });
+
+    iframe.src = "https://player.vimeo.com/video/1197201080?" + vimeoParams.toString();
+
     const player = new Vimeo.Player(iframe);
 
     const startOverlay = document.getElementById("start-overlay");
@@ -701,11 +710,7 @@
     let totalSeconds = DEFAULT_VIDEO_DURATION;
     let ctaShown = false;
     let fakeFullscreenActive = false;
-
-    function isMobileLike() {
-      return window.matchMedia("(max-width: 768px)").matches ||
-        /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-    }
+    let vimeoFullscreenActive = false;
 
     function isLostRoute() {
       const params = new URLSearchParams(window.location.search);
@@ -743,9 +748,11 @@
     window.addEventListener("popstate", renderRoute);
 
     player.ready().then(function () {
-      player.setMuted(true).catch(function () {});
-      player.setVolume(0).catch(function () {});
-      player.play().catch(function () {});
+      if (!mobile) {
+        player.setMuted(true).catch(function () {});
+        player.setVolume(0).catch(function () {});
+        player.play().catch(function () {});
+      }
 
       player.getDuration().then(function (duration) {
         if (duration && duration > 0) totalSeconds = duration;
@@ -761,7 +768,7 @@
     });
 
     player.on("ended", function () {
-      if (!hasUserStarted) {
+      if (!hasUserStarted && !mobile) {
         player.setCurrentTime(0).then(function () {
           player.setMuted(true).catch(function () {});
           player.setVolume(0).catch(function () {});
@@ -781,6 +788,13 @@
 
       if (currentSeconds >= CTA_TIME_SECONDS) showCTA();
     });
+
+    try {
+      player.on("fullscreenchange", function (data) {
+        vimeoFullscreenActive = !!(data && data.fullscreen);
+        updateFullscreenButton();
+      });
+    } catch (error) {}
 
     startOverlay.addEventListener("click", function (event) {
       event.preventDefault();
@@ -815,7 +829,7 @@
     fullscreenButton.addEventListener("click", function (event) {
       event.preventDefault();
       event.stopPropagation();
-      toggleFullscreen();
+      toggleFullscreenAggressive();
     });
 
     document.addEventListener("fullscreenchange", updateFullscreenButton);
@@ -831,24 +845,26 @@
       pauseOverlay.classList.add("hidden");
       updateFakeProgress(0);
 
-      // Ordem feita especialmente para mobile: tudo no clique do usuário, sem esperar promise.
+      /*
+        No mobile, tudo acontece dentro do primeiro toque do usuário.
+        Isso evita o problema do vídeo só ter áudio depois de pausar/reiniciar.
+      */
       player.pause().catch(function () {});
       player.setMuted(false).catch(function () {});
       player.setVolume(1).catch(function () {});
       player.setCurrentTime(0).catch(function () {});
       player.play().catch(function () {});
 
-      // Reforços curtos para alguns navegadores mobile que mantêm o Vimeo mudo no primeiro toque.
       setTimeout(function () {
         player.setMuted(false).catch(function () {});
         player.setVolume(1).catch(function () {});
         player.play().catch(function () {});
-      }, 120);
+      }, 100);
 
       setTimeout(function () {
         player.setMuted(false).catch(function () {});
         player.setVolume(1).catch(function () {});
-      }, 480);
+      }, 450);
     }
 
     function pauseVideoAndShowOverlay() {
@@ -941,25 +957,29 @@
       fill.style.width = percent.toFixed(2) + "%";
     }
 
-    function toggleFullscreen() {
+    function toggleFullscreenAggressive() {
       if (isCurrentlyFullscreen()) {
-        exitFullscreen();
+        exitFullscreenAggressive();
         return;
       }
 
-      requestVideoFullscreen();
+      requestFullscreenAggressive();
     }
 
-    function requestVideoFullscreen() {
-      if (isMobileLike()) {
-        enableFakeFullscreen();
-        return;
-      }
-
+    /*
+      Modo agressivo:
+      1) Tenta fullscreen real do container primeiro, para manter nosso botão "Voltar".
+      2) Se bloquear, tenta fullscreen real do Vimeo.
+      3) Se bloquear, usa fallback fake rotacionado.
+    */
+    function requestFullscreenAggressive() {
       try {
         if (videoContainer.requestFullscreen) {
-          videoContainer.requestFullscreen().then(lockLandscape).catch(function () {
-            enableFakeFullscreen();
+          videoContainer.requestFullscreen().then(function () {
+            lockLandscape();
+            updateFullscreenButton();
+          }).catch(function () {
+            tryVimeoFullscreenThenFake();
           });
           return;
         }
@@ -971,22 +991,43 @@
           return;
         }
 
-        if (videoContainer.msRequestFullscreen) {
-          videoContainer.msRequestFullscreen();
-          lockLandscape();
-          setTimeout(updateFullscreenButton, 150);
-          return;
-        }
-
-        enableFakeFullscreen();
+        tryVimeoFullscreenThenFake();
       } catch (error) {
-        enableFakeFullscreen();
+        tryVimeoFullscreenThenFake();
       }
     }
 
-    function exitFullscreen() {
+    function tryVimeoFullscreenThenFake() {
+      try {
+        if (typeof player.requestFullscreen === "function") {
+          player.requestFullscreen().then(function () {
+            vimeoFullscreenActive = true;
+            lockLandscape();
+            updateFullscreenButton();
+          }).catch(function () {
+            enableFakeFullscreen();
+          });
+          return;
+        }
+      } catch (error) {}
+
+      enableFakeFullscreen();
+    }
+
+    function exitFullscreenAggressive() {
       if (fakeFullscreenActive) {
         disableFakeFullscreen();
+        return;
+      }
+
+      if (vimeoFullscreenActive) {
+        try {
+          if (typeof player.exitFullscreen === "function") {
+            player.exitFullscreen().catch(function () {});
+          }
+        } catch (error) {}
+        vimeoFullscreenActive = false;
+        updateFullscreenButton();
         return;
       }
 
@@ -1021,7 +1062,7 @@
     }
 
     function isCurrentlyFullscreen() {
-      return !!document.fullscreenElement || !!document.webkitFullscreenElement || fakeFullscreenActive;
+      return !!document.fullscreenElement || !!document.webkitFullscreenElement || fakeFullscreenActive || vimeoFullscreenActive;
     }
 
     function updateFullscreenButton() {
@@ -1030,6 +1071,7 @@
         fullscreenIconPath.setAttribute("d", BACK_ICON);
       } else {
         fakeFullscreenActive = false;
+        vimeoFullscreenActive = false;
         videoContainer.classList.remove("fake-fullscreen");
         document.body.classList.remove("no-scroll");
         fullscreenLabel.textContent = "Tela cheia";
