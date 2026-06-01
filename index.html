@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <title>Sua cabeça liga justamente quando você tenta dormir?</title>
 
@@ -19,6 +19,12 @@
       color: #fff;
       font-family: Arial, Helvetica, sans-serif;
       overflow-x: hidden;
+    }
+
+    body.no-scroll {
+      overflow: hidden;
+      height: 100vh;
+      touch-action: none;
     }
 
     a { color: inherit; text-decoration: none; }
@@ -116,13 +122,27 @@
 
     #video-container.fake-fullscreen {
       position: fixed;
-      inset: 0;
-      z-index: 9999;
-      width: 100vw;
-      height: 100vh;
+      top: 50%;
+      left: 50%;
+      z-index: 999999;
+      width: 100svh;
+      height: 100svw;
+      max-width: none;
       aspect-ratio: auto;
       border-radius: 0;
+      transform: translate(-50%, -50%) rotate(90deg);
       background: #000;
+      box-shadow: none;
+    }
+
+    @media (orientation: landscape) {
+      #video-container.fake-fullscreen {
+        top: 0;
+        left: 0;
+        width: 100svw;
+        height: 100svh;
+        transform: none;
+      }
     }
 
     #vimeo-player {
@@ -134,6 +154,27 @@
       z-index: 1;
       background: #000;
       pointer-events: none;
+    }
+
+    /* No mobile fullscreen fake, o iframe é levemente ampliado para preencher a tela toda. */
+    @media (orientation: portrait) {
+      #video-container.fake-fullscreen #vimeo-player {
+        width: 100%;
+        height: 56.25svh;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+      }
+    }
+
+    @media (orientation: landscape) {
+      #video-container.fake-fullscreen #vimeo-player {
+        width: 100%;
+        height: 56.25svw;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+      }
     }
 
     #start-overlay,
@@ -281,9 +322,9 @@
 
     #fullscreen-button {
       position: absolute;
-      right: 14px;
-      bottom: 14px;
-      z-index: 5;
+      right: max(14px, env(safe-area-inset-right));
+      bottom: max(14px, env(safe-area-inset-bottom));
+      z-index: 20;
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -291,15 +332,21 @@
       padding: 10px 13px;
       border: 1px solid rgba(255,255,255,0.22);
       border-radius: 999px;
-      background: rgba(0,0,0,0.58);
+      background: rgba(0,0,0,0.64);
       color: #fff;
       font-size: 13px;
       font-weight: 900;
       line-height: 1;
       cursor: pointer;
       backdrop-filter: blur(10px);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.26);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.36);
       transition: transform 0.15s ease, background 0.15s ease, opacity 0.2s ease;
+    }
+
+    #video-container.fake-fullscreen #fullscreen-button {
+      right: calc(env(safe-area-inset-right, 0px) + 18px);
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 18px);
+      z-index: 30;
     }
 
     #fullscreen-button:hover {
@@ -314,12 +361,16 @@
     }
 
     #progress-bar-track {
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      z-index: 15;
       width: 100%;
       height: 10px;
       background: rgba(255,255,255,0.14);
       overflow: hidden;
-      border-radius: 0 0 18px 18px;
-      transform: translateY(-1px);
+      border-radius: 0;
+      pointer-events: none;
     }
 
     #progress-bar-fill {
@@ -418,9 +469,7 @@
       text-underline-offset: 3px;
     }
 
-    .footer-links a:hover {
-      color: #fff;
-    }
+    .footer-links a:hover { color: #fff; }
 
     #lost-page {
       display: none;
@@ -508,12 +557,13 @@
       h1 { font-size: clamp(29px, 9vw, 42px); }
       .video-shell { padding: 7px; border-radius: 23px; }
       #video-container { border-radius: 17px; }
+      #video-container.fake-fullscreen { border-radius: 0; }
       .overlay-icon { width: 74px; height: 74px; }
       .overlay-icon svg { width: 34px; height: 34px; }
       #fullscreen-button {
         right: 10px;
-        bottom: 10px;
-        padding: 9px 11px;
+        bottom: 14px;
+        padding: 9px 12px;
         font-size: 12px;
       }
       .pause-card {
@@ -587,10 +637,10 @@
               </svg>
               <span id="fullscreen-label">Tela cheia</span>
             </button>
-          </div>
 
-          <div id="progress-bar-track">
-            <div id="progress-bar-fill"></div>
+            <div id="progress-bar-track">
+              <div id="progress-bar-fill"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -652,6 +702,11 @@
     let ctaShown = false;
     let fakeFullscreenActive = false;
 
+    function isMobileLike() {
+      return window.matchMedia("(max-width: 768px)").matches ||
+        /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+    }
+
     function isLostRoute() {
       const params = new URLSearchParams(window.location.search);
       const page = params.get("pagina");
@@ -688,8 +743,8 @@
     window.addEventListener("popstate", renderRoute);
 
     player.ready().then(function () {
-      player.setMuted(true);
-      player.setVolume(0);
+      player.setMuted(true).catch(function () {});
+      player.setVolume(0).catch(function () {});
       player.play().catch(function () {});
 
       player.getDuration().then(function (duration) {
@@ -708,8 +763,8 @@
     player.on("ended", function () {
       if (!hasUserStarted) {
         player.setCurrentTime(0).then(function () {
-          player.setMuted(true);
-          player.setVolume(0);
+          player.setMuted(true).catch(function () {});
+          player.setVolume(0).catch(function () {});
           player.play().catch(function () {});
         });
       } else {
@@ -776,15 +831,24 @@
       pauseOverlay.classList.add("hidden");
       updateFakeProgress(0);
 
-      player.setCurrentTime(0).then(function () {
-        player.setMuted(false);
-        player.setVolume(1);
-        return player.play();
-      }).catch(function () {
-        player.setMuted(false);
-        player.setVolume(1);
+      // Ordem feita especialmente para mobile: tudo no clique do usuário, sem esperar promise.
+      player.pause().catch(function () {});
+      player.setMuted(false).catch(function () {});
+      player.setVolume(1).catch(function () {});
+      player.setCurrentTime(0).catch(function () {});
+      player.play().catch(function () {});
+
+      // Reforços curtos para alguns navegadores mobile que mantêm o Vimeo mudo no primeiro toque.
+      setTimeout(function () {
+        player.setMuted(false).catch(function () {});
+        player.setVolume(1).catch(function () {});
         player.play().catch(function () {});
-      });
+      }, 120);
+
+      setTimeout(function () {
+        player.setMuted(false).catch(function () {});
+        player.setVolume(1).catch(function () {});
+      }, 480);
     }
 
     function pauseVideoAndShowOverlay() {
@@ -798,6 +862,8 @@
       pauseOverlay.classList.remove("visible");
       pauseOverlay.classList.add("hidden");
 
+      player.setMuted(false).catch(function () {});
+      player.setVolume(1).catch(function () {});
       player.play().then(function () {
         isPlaying = true;
       }).catch(function () {
@@ -810,15 +876,14 @@
       pauseOverlay.classList.add("hidden");
       updateFakeProgress(0);
 
-      player.setCurrentTime(0).then(function () {
-        player.setMuted(false);
-        player.setVolume(1);
-        return player.play();
-      }).then(function () {
+      player.setMuted(false).catch(function () {});
+      player.setVolume(1).catch(function () {});
+      player.setCurrentTime(0).catch(function () {});
+      player.play().then(function () {
         isPlaying = true;
       }).catch(function () {
-        player.setMuted(false);
-        player.setVolume(1);
+        player.setMuted(false).catch(function () {});
+        player.setVolume(1).catch(function () {});
         player.play().catch(function () {});
         isPlaying = true;
       });
@@ -832,16 +897,6 @@
       ctaArea.classList.add("cta-visible");
     }
 
-    /*
-      Curva fake:
-      00:30 -> 25%
-      01:00 -> 35%
-      02:00 -> 45%
-      03:00 -> 54%
-      04:00 -> 60%
-      05:00 -> 65%
-      13:30 -> 90% e aparece o CTA
-    */
     function getFakePercent(seconds) {
       const anchors = [
         { t: 0, p: 0 },
@@ -896,6 +951,11 @@
     }
 
     function requestVideoFullscreen() {
+      if (isMobileLike()) {
+        enableFakeFullscreen();
+        return;
+      }
+
       try {
         if (videoContainer.requestFullscreen) {
           videoContainer.requestFullscreen().then(lockLandscape).catch(function () {
@@ -925,6 +985,11 @@
     }
 
     function exitFullscreen() {
+      if (fakeFullscreenActive) {
+        disableFakeFullscreen();
+        return;
+      }
+
       try {
         if (document.fullscreenElement && document.exitFullscreen) {
           document.exitFullscreen().catch(function () {});
@@ -943,6 +1008,7 @@
     function enableFakeFullscreen() {
       fakeFullscreenActive = true;
       videoContainer.classList.add("fake-fullscreen");
+      document.body.classList.add("no-scroll");
       lockLandscape();
       updateFullscreenButton();
     }
@@ -950,6 +1016,7 @@
     function disableFakeFullscreen() {
       fakeFullscreenActive = false;
       videoContainer.classList.remove("fake-fullscreen");
+      document.body.classList.remove("no-scroll");
       updateFullscreenButton();
     }
 
@@ -964,6 +1031,7 @@
       } else {
         fakeFullscreenActive = false;
         videoContainer.classList.remove("fake-fullscreen");
+        document.body.classList.remove("no-scroll");
         fullscreenLabel.textContent = "Tela cheia";
         fullscreenIconPath.setAttribute("d", EXPAND_ICON);
       }
